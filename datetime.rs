@@ -313,10 +313,9 @@ fn month_length(m: int, ly: bool) -> int {
 
 impl of date_funcs for int {
 	fn date_parts() -> date_parts {
-		let dm1 = self - 1;
-		assert dm1 >= 0 && dm1 < 3652059;
-		let n400 = dm1/146097;
-		let d1 = dm1 % 146097;
+		assert self >= 0 && self < 3652059;
+		let n400 = self/146097;
+		let d1 = self % 146097;
 		let n100 = d1/36524;
 		let d2 = d1 % 36524;
 		let n4 = d2/1461;
@@ -343,7 +342,7 @@ impl of date_funcs for int {
 		let ly = leapyear(y);
 		assert y > 0 && y < 10000 && m > 0 && m < 13 && d > 0 && d <= month_length(m, ly);
 		let ym1 = y - 1;
-		(365*ym1 + ym1/4 - ym1/100 + ym1/400 + accume_days(m, ly) + d) as date_funcs
+		(365*ym1 + ym1/4 - ym1/100 + ym1/400 + accume_days(m, ly) + d - 1) as date_funcs
 	}
 	
 	fn to_str() -> str {
@@ -400,8 +399,8 @@ impl of date_time_funcs for date_time_parts {
 
 #[test]
 fn test_all_dates() {
-	let i = 1;
-	while i <= 3652059 {
+	let i = 0;
+	while i < 3652059 {
 		log(debug, i);
 		let parts = i.date_parts();
 		log(debug, parts);
@@ -415,7 +414,7 @@ fn test_all_dates() {
 fn test_date_str() {
 	let x = (0 as date_funcs).from_parts({year: 1, month: 1, day: 1, doy: 1});
 	assert x.to_str() == "0001-01-01";
-	assert (1 as date_funcs).to_str() == "0001-01-01";
+	assert (0 as date_funcs).to_str() == "0001-01-01";
 	let x = (0 as date_funcs).from_parts({year: 9999, month: 12, day: 31, doy: 1});
 	assert x.to_str() == "9999-12-31";
 }
@@ -444,7 +443,7 @@ fn test_time_str() {
 
 #[test]
 fn test_date_time_str() {
-	assert {date: 1 as date_funcs, time: 0 as time_funcs}.to_str() == "0001-01-01 00:00:00";
-	assert {date: 3652059 as date_funcs, time: 86399 as time_funcs}.to_str() == "9999-12-31 23:59:59";
+	assert {date: 0 as date_funcs, time: 0 as time_funcs}.to_str() == "0001-01-01 00:00:00";
+	assert {date: 3652058 as date_funcs, time: 86399 as time_funcs}.to_str() == "9999-12-31 23:59:59";
 }
 
