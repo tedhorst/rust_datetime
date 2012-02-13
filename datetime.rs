@@ -420,6 +420,18 @@ fn test_date_str() {
 }
 
 #[test]
+#[should_fail]
+fn test_low_date_limit() {
+	(-1).date_parts();
+}
+
+#[test]
+#[should_fail]
+fn test_high_date_limit() {
+	3652059.date_parts();
+}
+
+#[test]
 fn test_all_times() {
 	let i = 0;
 	while i < 86400 {
@@ -439,6 +451,18 @@ fn test_time_str() {
 	assert (0 as time_funcs).to_str() == "00:00:00";
 	let x = (0 as time_funcs).from_parts({hour: 23, minute: 59, second: 59});
 	assert x.to_str() == "23:59:59";
+}
+
+#[test]
+#[should_fail]
+fn test_low_time_limit() {
+	(-1).time_parts();
+}
+
+#[test]
+#[should_fail]
+fn test_time_date_limit() {
+	86400.time_parts();
 }
 
 #[test]
