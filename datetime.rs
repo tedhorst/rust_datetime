@@ -192,12 +192,12 @@ impl of date_funcs for int {
 		let ym1 = y - 1;
 		(365*ym1 + ym1/4 - ym1/100 + ym1/400 + accume_days(m, ly) + d - 1) as date_funcs
 	}
-	
+
 	fn to_str() -> str {
 		let parts = self.date_parts();
 		#fmt("%04d-%02d-%02d", parts.year, parts.month, parts.day)
 	}
-	
+
 	fn from_str(ds: str) -> date_funcs {
 		assert str::len(ds) == 10_u;
 		let parts = str::split_char(ds, '-');
@@ -207,11 +207,11 @@ impl of date_funcs for int {
 		let d = int::from_str(parts[2]);
 		(0 as date_funcs).from_parts({year: y, month: m, day: d, doy: 0})
 	}
-	
+
 	fn days_since_epoch() -> int {
 		self as int
 	}
-	
+
 	fn epcoh_date_str() -> str {
 		"0001-01-01"
 	}
@@ -222,7 +222,7 @@ impl of time_funcs for int {
 		assert self >= 0 && self < 86400;
 		{hour: self/3600, minute: self/60 % 60, second: self % 60, frac: 0}
 	}
-	
+
 	fn from_parts(parts: time_parts) -> time_funcs {
 		let h = parts.hour;
 		let m = parts.minute;
@@ -230,16 +230,16 @@ impl of time_funcs for int {
 		assert h >= 0 && h < 24 && m >= 0 && m < 60 && s >= 0 && s < 60;
 		(3600*parts.hour + 60*parts.minute + parts.second) as time_funcs
 	}
-	
+
 	fn to_str() -> str {
 		let parts = self.time_parts();
 		#fmt("%02d:%02d:%02d", parts.hour, parts.minute, parts.second)
 	}
-	
+
 	fn second_count() -> int {
 		self as int
 	}
-	
+
 	fn from_str(ds: str) -> time_funcs {
 		assert str::len(ds) == 8_u;
 		let parts = str::split_char(ds, ':');
@@ -259,15 +259,15 @@ impl of date_time_funcs for date_time_parts {
 	fn date() -> date_funcs {
 		self.date
 	}
-	
+
 	fn time() -> time_funcs {
 		self.time
 	}
-	
+
 	fn to_str() -> str {
 		#fmt("%s %s", self.date.to_str(), self.time.to_str())
 	}
-	
+
 	fn from_str(ds: str) -> date_time_funcs {
 		assert str::len(ds) == 19_u;
 		let parts = str::split_char(ds, ' ');
