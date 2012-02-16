@@ -31,22 +31,7 @@ iface date_time_funcs {
 	fn from_str(ds: str) -> date_time_funcs;
 }
 
-fn leapyear(y: int) -> bool {
-	if y % 4 != 0 {
-		false
-	}
-	else if y % 100 == 0 {
-		if y % 400 == 0 {
-			true
-		}
-		else {
-			false
-		}
-	}
-	else {
-		true
-	}
-}
+fn leapyear(y: int) -> bool { y % 4 == 0 && (y % 100 != 0 || y % 400 == 0) }
 
 fn month_lookup(doy: int, ly: bool) -> int {
 	if ly {
