@@ -364,14 +364,18 @@ fn test_bad_date_str7() {
 
 #[test]
 fn test_all_times() {
+	let rng = std::rand::mk_rng();
 	let i = 0_u32;
 	while i < 86400000_u32 {
 		log(debug, i);
 		let parts = (i as time_funcs).parts();
 		log(debug, parts);
 		let x2 = (i as time_funcs).from_parts(parts);
-		assert x2.parts() == parts;
-		i += 1_u32;
+		let i2 = (1000.*x2.secs() + 0.5) as u32;
+		assert i2 == i;
+		let s = (i as time_funcs).str();
+		assert (0_u32 as time_funcs).from_str(s).parts() == parts;
+		i += rng.next() % 1000_u32;
 	}
 }
 
@@ -380,8 +384,9 @@ fn test_time_str() {
 	let x = (0_u32 as time_funcs).from_parts({hour: 0_u8, minute: 0_u8, second: 0_u8, frac: 0_u32});
 	assert x.str() == "00:00:00";
 	assert (0_u32 as time_funcs).str() == "00:00:00";
-	let x = (0_u32 as time_funcs).from_parts({hour: 23_u8, minute: 59_u8, second: 59_u8, frac: 0_u32});
-	assert x.str() == "23:59:59";
+	assert (1_u32 as time_funcs).str() == "00:00:00.001";
+	let x = (0_u32 as time_funcs).from_parts({hour: 23_u8, minute: 59_u8, second: 59_u8, frac: 999_u32});
+	assert x.str() == "23:59:59.999";
 }
 
 #[test]
@@ -392,8 +397,38 @@ fn test_low_time_limit() {
 
 #[test]
 #[should_fail]
-fn test_time_date_limit() {
+fn test_high_time_limit() {
 	(86400000_u32 as time_funcs).parts();
+}
+
+#[test]
+#[should_fail]
+fn test_bad_time_str1() {
+	(0_u32 as time_funcs).from_str("2100-02-28");
+}
+
+#[test]
+#[should_fail]
+fn test_bad_time_str2() {
+	(0_u32 as time_funcs).from_str("24:22:11");
+}
+
+#[test]
+#[should_fail]
+fn test_bad_time_str3() {
+	(0_u32 as time_funcs).from_str("20:60:11");
+}
+
+#[test]
+#[should_fail]
+fn test_bad_time_str4() {
+	(0_u32 as time_funcs).from_str("20:22:60");
+}
+
+#[test]
+#[should_fail]
+fn test_bad_time_str5() {
+	(0_u32 as time_funcs).from_str("20:22:11.33");
 }
 
 #[test]
@@ -402,7 +437,7 @@ fn test_date_time_str() {
 	assert {date: 0_u32 as date_funcs, time: 0_u32 as time_funcs}.str() == "0001-01-01 00:00:00";
 	assert {date: 3652058_u32 as date_funcs, time: 86399999_u32 as time_funcs}.str() == "9999-12-31 23:59:59.999";
 	assert dp.from_str("0001-01-01 00:00:00").str() == "0001-01-01 00:00:00";
-	assert dp.from_str("9999-12-31 23:59:59").str() == "9999-12-31 23:59:59";
+	assert dp.from_str("9999-12-31 23:59:59.999").str() == "9999-12-31 23:59:59.999";
 }
 
 #[test]
