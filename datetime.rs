@@ -231,13 +231,21 @@ impl of time_funcs for u32 {
 	}
 
 	fn from_str(ds: str) -> time_funcs {
-		assert str::len(ds) == 8_u;
+		let sl = str::len(ds);
+		assert sl == 8_u || sl == 12_u;
 		let parts = str::split_char(ds, ':');
 		assert vec::len(parts) == 3_u;
 		let h = uint::from_str(parts[0]) as u8;
 		let m = uint::from_str(parts[1]) as u8;
-		let s = uint::from_str(parts[2]) as u8;
-		(0_u32 as time_funcs).from_parts({hour: h, minute: m, second: s, frac: 0_u32})
+		let fss = str::split_char(parts[2], '.');
+		let s = uint::from_str(fss[0]) as u8;
+		let f = if vec::len(fss) == 2_u {
+			uint::from_str(fss[1]) as u32
+		}
+		else {
+			0_u32
+		};
+		(0_u32 as time_funcs).from_parts({hour: h, minute: m, second: s, frac: f})
 	}
 
 	fn resolution() -> u32 {
@@ -259,7 +267,8 @@ impl of date_time_funcs for date_time_parts {
 	}
 
 	fn from_str(ds: str) -> date_time_funcs {
-		assert str::len(ds) == 19_u;
+		let sl = str::len(ds);
+		assert sl == 19_u || sl == 23_u;
 		let parts = str::split_char(ds, ' ');
 		assert vec::len(parts) == 2_u;
 		let d = (0_u32 as date_funcs).from_str(parts[0]);
