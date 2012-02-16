@@ -2,7 +2,7 @@ use std;
 
 type date_parts = {year: u16, month: u8, day: u8, doy: u16};
 
-type time_parts = {hour: int, minute: int, second: int, frac: int};
+type time_parts = {hour: u8, minute: u8, second: u8, frac: u32};
 
 type date_time_parts = {date: date_funcs, time: time_funcs};
 
@@ -205,20 +205,20 @@ impl of date_funcs for u32 {
 impl of time_funcs for int {
 	fn parts() -> time_parts {
 		assert self >= 0 && self < 86400;
-		{hour: self/3600, minute: self/60 % 60, second: self % 60, frac: 0}
+		{hour: (self/3600) as u8, minute: (self/60 % 60) as u8, second: (self % 60) as u8, frac: 0_u32}
 	}
 
 	fn from_parts(parts: time_parts) -> time_funcs {
-		let h = parts.hour;
-		let m = parts.minute;
-		let s = parts.second;
+		let h = parts.hour as int;
+		let m = parts.minute as int;
+		let s = parts.second as int;
 		assert h >= 0 && h < 24 && m >= 0 && m < 60 && s >= 0 && s < 60;
-		(3600*parts.hour + 60*parts.minute + parts.second) as time_funcs
+		(3600*h + 60*m + s) as time_funcs
 	}
 
 	fn str() -> str {
 		let parts = self.parts();
-		#fmt("%02d:%02d:%02d", parts.hour, parts.minute, parts.second)
+		#fmt("%02u:%02u:%02u", parts.hour as uint, parts.minute as uint, parts.second as uint)
 	}
 
 	fn secs() -> int {
@@ -233,10 +233,10 @@ impl of time_funcs for int {
 		assert str::len(ds) == 8_u;
 		let parts = str::split_char(ds, ':');
 		assert vec::len(parts) == 3_u;
-		let h = int::from_str(parts[0]);
-		let m = int::from_str(parts[1]);
-		let s = int::from_str(parts[2]);
-		(0 as time_funcs).from_parts({hour: h, minute: m, second: s, frac: 0})
+		let h = uint::from_str(parts[0]) as u8;
+		let m = uint::from_str(parts[1]) as u8;
+		let s = uint::from_str(parts[2]) as u8;
+		(0 as time_funcs).from_parts({hour: h, minute: m, second: s, frac: 0_u32})
 	}
 
 	fn resolution() -> int {
@@ -367,10 +367,10 @@ fn test_all_times() {
 
 #[test]
 fn test_time_str() {
-	let x = (0 as time_funcs).from_parts({hour: 0, minute: 0, second: 0, frac: 0});
+	let x = (0 as time_funcs).from_parts({hour: 0_u8, minute: 0_u8, second: 0_u8, frac: 0_u32});
 	assert x.str() == "00:00:00";
 	assert (0 as time_funcs).str() == "00:00:00";
-	let x = (0 as time_funcs).from_parts({hour: 23, minute: 59, second: 59, frac: 0});
+	let x = (0 as time_funcs).from_parts({hour: 23_u8, minute: 59_u8, second: 59_u8, frac: 0_u32});
 	assert x.str() == "23:59:59";
 }
 
