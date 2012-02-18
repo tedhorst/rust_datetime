@@ -23,6 +23,8 @@ iface time_funcs {
 	fn from_str(ds: str) -> time_funcs;
 	fn secs() -> f64;
 	fn from_secs(s: f64) -> time_funcs;
+	fn millis() -> u32;
+	fn from_millis(ms: u32) -> time_funcs;
 	fn resolution() -> u32;
 }
 
@@ -230,6 +232,14 @@ impl of time_funcs for u32 {
 		(1000.*s) as u32 as time_funcs
 	}
 
+	fn millis() -> u32 {
+		self
+	}
+
+	fn from_millis(ms: u32) -> time_funcs {
+		ms as time_funcs
+	}
+
 	fn from_str(ds: str) -> time_funcs {
 		let sl = str::len(ds);
 		assert sl == 8_u || sl == 12_u;
@@ -274,6 +284,30 @@ impl of date_time_funcs for date_time_parts {
 		let d = (0_u32 as date_funcs).from_str(parts[0]);
 		let t = (0_u32 as time_funcs).from_str(parts[1]);
 		{date: d, time: t} as date_time_funcs
+	}
+}
+
+impl of date_time_funcs for u64 {
+	fn date() -> date_funcs {
+		((self/86400000_u64) as u32) as date_funcs
+	}
+
+	fn time() -> time_funcs {
+		((self % 86400000_u64) as u32) as time_funcs
+	}
+
+	fn str() -> str {
+		#fmt("%s %s", self.date().str(), self.time().str())
+	}
+
+	fn from_str(ds: str) -> date_time_funcs {
+		let sl = str::len(ds);
+		assert sl == 19_u || sl == 23_u;
+		let parts = str::split_char(ds, ' ');
+		assert vec::len(parts) == 2_u;
+		let d = (0_u32 as date_funcs).from_str(parts[0]);
+		let t = (0_u32 as time_funcs).from_str(parts[1]);
+		((d.days() as u64)*86400000_u64 + (t.millis() as u64)) as date_time_funcs
 	}
 }
 
@@ -432,10 +466,33 @@ fn test_bad_time_str5() {
 }
 
 #[test]
+fn test_all_date_times() {
+	let rng = std::rand::mk_rng();
+	let cnt = 0_u;
+	let i = 0_u64;
+	let dt = i as date_time_funcs;
+	while i < 315537897600000_u64 {
+		dt = i as date_time_funcs;
+		let d = dt.date();
+		let t = dt.time();
+		let i2 = ((d.days() as u64)*86400000_u64) + (t.millis() as u64);
+		if i != i2 {
+			log(error, (dt.str(), i, i2, d.days(), t.millis()));
+			fail
+		}
+		i += ((rng.next() % 86400000_u32) as u64) + 86400000_u64*((rng.next() % 7_u32) as u64);
+		cnt += 1_u;
+	}
+	log(error, #fmt("tested %u date times, ending with: %s", cnt, dt.str()));
+}
+
+#[test]
 fn test_date_time_str() {
 	let dp = {date: 0_u32 as date_funcs, time: 0_u32 as time_funcs};
-	assert {date: 0_u32 as date_funcs, time: 0_u32 as time_funcs}.str() == "0001-01-01 00:00:00";
+	assert dp.str() == "0001-01-01 00:00:00";
+	assert (0_u64 as date_time_funcs).str() == "0001-01-01 00:00:00";
 	assert {date: 3652058_u32 as date_funcs, time: 86399999_u32 as time_funcs}.str() == "9999-12-31 23:59:59.999";
+	assert (315537897599999_u64 as date_time_funcs).str() == "9999-12-31 23:59:59.999";
 	assert dp.from_str("0001-01-01 00:00:00").str() == "0001-01-01 00:00:00";
 	assert dp.from_str("9999-12-31 23:59:59.999").str() == "9999-12-31 23:59:59.999";
 }
