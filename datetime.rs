@@ -7,8 +7,8 @@ type time_parts = {hour: u8, minute: u8, second: u8, frac: u32};
 type date_time_parts = {date: date, time: time};
 
 iface date {
-	fn parts() -> date_parts;
-	fn from_parts(parts: date_parts) -> date;
+	fn parts() -> option<date_parts>;
+	fn from_parts(parts: date_parts) -> option<date>;
 	fn days() -> u32;
 	fn from_days(d: u32) -> date;
 	fn str() -> str;
@@ -120,8 +120,10 @@ fn month_length(m: u8, ly: bool) -> u8 {
 }
 
 impl of date for u32 {
-	fn parts() -> date_parts {
-		assert self >= 0_u32 && self < 3652059_u32;
+	fn parts() -> option<date_parts> {
+		if self > 3652058_u32 {
+			ret none
+		}
 		let n400 = self/146097_u32;
 		let d1 = self % 146097_u32;
 		let n100 = d1/36524_u32;
@@ -140,21 +142,23 @@ impl of date for u32 {
 		let ly = leapyear(y);
 		let m = month_lookup(doy, ly);
 		let d = doy - accume_days(m, ly);
-		{year: y, month: m as u8, day: d as u8, doy: doy as u16}
+		some({year: y, month: m as u8, day: d as u8, doy: doy as u16})
 	}
 
-	fn from_parts(parts: date_parts) -> date {
+	fn from_parts(parts: date_parts) -> option<date> {
 		let y = parts.year;
 		let m = parts.month;
 		let d = parts.day;
 		let ly = leapyear(y);
-		assert y > 0_u16 && y < 10000_u16 && m > 0_u8 && m < 13_u8 && d > 0_u8 && d <= month_length(m, ly);
+		if y < 1_u16 || y > 9999_u16 || m < 1_u8 || m > 12_u8 || d < 1_u8 || d > month_length(m, ly) {
+			ret none
+		}
 		let ym1 = y as u32 - 1_u32;
-		(365_u32*ym1 + ym1/4_u32 - ym1/100_u32 + ym1/400_u32 + accume_days(m, ly) as u32 + d as u32 - 1_u32) as date
+		some((365_u32*ym1 + ym1/4_u32 - ym1/100_u32 + ym1/400_u32 + accume_days(m, ly) as u32 + d as u32 - 1_u32) as date)
 	}
 
 	fn str() -> str {
-		let parts = (self as date).parts();
+		let parts = option::get((self as date).parts());
 		#fmt("%04u-%02u-%02u", parts.year as uint, parts.month as uint, parts.day as uint)
 	}
 
@@ -165,7 +169,7 @@ impl of date for u32 {
 		let y = option::get(uint::from_str(parts[0])) as u16;
 		let m = option::get(uint::from_str(parts[1])) as u8;
 		let d = option::get(uint::from_str(parts[2])) as u8;
-		(0_u32 as date).from_parts({year: y, month: m, day: d, doy: 0_u16})
+		option::get((0_u32 as date).from_parts({year: y, month: m, day: d, doy: 0_u16}))
 	}
 
 	fn days() -> u32 {
@@ -322,9 +326,9 @@ mod tests {
 		while i < 3652059_u32 {
 			log(debug, i);
 			d = i as date;
-			let parts = d.parts();
+			let parts = option::get(d.parts());
 			log(debug, parts);
-			let x2 = d.from_parts(parts);
+			let x2 = option::get(d.from_parts(parts));
 			assert x2.days() == i;
 			i += 1_u32;
 		}
@@ -335,8 +339,8 @@ mod tests {
 	fn test_date_str() {
 		assert (0_u32 as date).str() == "0001-01-01";
 		assert (3652058_u32 as date).str() == "9999-12-31";
-		assert (0_u32 as date).from_parts({year: 1_u16, month: 1_u8, day: 1_u8, doy: 1_u16}).str() == "0001-01-01";
-		assert (0_u32 as date).from_parts({year: 9999_u16, month: 12_u8, day: 31_u8, doy: 1_u16}).str() == "9999-12-31";
+		assert option::get((0_u32 as date).from_parts({year: 1_u16, month: 1_u8, day: 1_u8, doy: 1_u16})).str() == "0001-01-01";
+		assert option::get((0_u32 as date).from_parts({year: 9999_u16, month: 12_u8, day: 31_u8, doy: 1_u16})).str() == "9999-12-31";
 		for ds in ["0001-01-01", "0001-01-02", "0001-01-31", "0001-02-28", "0001-03-01", "0001-12-31", "0066-01-01", "0077-01-01", "0088-01-01", "0099-01-01", "0777-01-01", "0888-01-01", "2000-02-29", "9999-12-31"] {
 			assert (0_u32 as date).from_str(ds).str() == ds;
 		}
@@ -345,13 +349,13 @@ mod tests {
 	#[test]
 	#[should_fail]
 	fn test_low_date_limit() {
-		(-1 as u32 as date).parts();
+		option::get((-1 as u32 as date).parts());
 	}
 
 	#[test]
 	#[should_fail]
 	fn test_high_date_limit() {
-		(3652059_u32 as date).parts();
+		option::get((3652059_u32 as date).parts());
 	}
 
 	#[test]
