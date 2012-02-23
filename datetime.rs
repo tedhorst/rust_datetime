@@ -162,9 +162,9 @@ impl of date for u32 {
 		assert str::len(ds) == 10_u;
 		let parts = str::split_char(ds, '-');
 		assert vec::len(parts) == 3_u;
-		let y = uint::from_str(parts[0]) as u16;
-		let m = uint::from_str(parts[1]) as u8;
-		let d = uint::from_str(parts[2]) as u8;
+		let y = option::get(uint::from_str(parts[0])) as u16;
+		let m = option::get(uint::from_str(parts[1])) as u8;
+		let d = option::get(uint::from_str(parts[2])) as u8;
 		(0_u32 as date).from_parts({year: y, month: m, day: d, doy: 0_u16})
 	}
 
@@ -227,12 +227,12 @@ impl of time for u32 {
 		assert sl == 8_u || sl == 12_u;
 		let parts = str::split_char(ds, ':');
 		assert vec::len(parts) == 3_u;
-		let h = uint::from_str(parts[0]) as u8;
-		let m = uint::from_str(parts[1]) as u8;
+		let h = option::get(uint::from_str(parts[0])) as u8;
+		let m = option::get(uint::from_str(parts[1])) as u8;
 		let fss = str::split_char(parts[2], '.');
-		let s = uint::from_str(fss[0]) as u8;
+		let s = option::get(uint::from_str(fss[0])) as u8;
 		let f = if vec::len(fss) == 2_u {
-			uint::from_str(fss[1]) as u32
+			option::get(uint::from_str(fss[1])) as u32
 		}
 		else {
 			0_u32
