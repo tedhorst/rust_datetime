@@ -457,7 +457,7 @@ mod tests {
 
 	#[test]
 	fn test_all_times() {
-		let rng = std::rand::mk_rng();
+		let rng = rand::rng();
 		let cnt = 0_u;
 		let i = 0_u32;
 		let t = i as time;
@@ -529,7 +529,7 @@ mod tests {
 
 	#[test]
 	fn test_all_date_times() {
-		let rng = std::rand::mk_rng();
+		let rng = rand::rng();
 		let cnt = 0_u;
 		let i = 0_u64;
 		let dt = i as date_time;
