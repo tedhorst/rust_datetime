@@ -376,8 +376,8 @@ impl of date_time for std::time::timeval {
 mod tests {
 	#[test]
 	fn test_all_dates() {
-		let i = 0_u32;
-		let d = i as date;
+		let mut i = 0_u32;
+		let mut d = i as date;
 		while i < 3652059_u32 {
 			log(debug, i);
 			d = i as date;
@@ -458,9 +458,9 @@ mod tests {
 	#[test]
 	fn test_all_times() {
 		let rng = rand::rng();
-		let cnt = 0_u;
-		let i = 0_u32;
-		let t = i as time;
+		let mut cnt = 0_u;
+		let mut i = 0_u32;
+		let mut t = i as time;
 		while i < 86400000_u32 {
 			log(debug, i);
 			t = i as time;
@@ -530,9 +530,9 @@ mod tests {
 	#[test]
 	fn test_all_date_times() {
 		let rng = rand::rng();
-		let cnt = 0_u;
-		let i = 0_u64;
-		let dt = i as date_time;
+		let mut cnt = 0_u;
+		let mut i = 0_u64;
+		let mut dt = i as date_time;
 		while i < 315537897600000_u64 {
 			dt = i as date_time;
 			let d = dt.date();
