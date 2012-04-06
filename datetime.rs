@@ -342,13 +342,13 @@ impl of date_time for u64 {
 
 const SECS_FROM_UNIX_EPOCH: u64 = 62135596800_u64;
 
-impl of date_time for std::time::timeval {
+impl of date_time for std::time::timespec {
 	fn date() -> date {
 		(((self.sec as u64 + SECS_FROM_UNIX_EPOCH)/86400_u64) as u32) as date
 	}
 
 	fn time() -> time {
-		((self.sec % 86400_u32)*1000_u32 + self.usec/1000_u32) as time
+		(((self.sec % 86400_i64)*1000_i64 + (self.nsec as i64)/1000000_i64) as u32) as time
 	}
 
 	fn str() -> str {
@@ -368,7 +368,7 @@ impl of date_time for std::time::timeval {
 			none { ret none }
 			some(t) { t }
 		};
-		some({sec: ((d.days() as u64)*86400_u64 - SECS_FROM_UNIX_EPOCH) as u32 + t.millis()/1000_u32, usec: (t.millis() % 1000_u32)*1000_u32} as date_time)
+		some({sec: ((d.days() as i64)*86400_i64 - SECS_FROM_UNIX_EPOCH as i64 + (t.millis() as i64)/1000_i64), nsec: (t.millis() as i32 % 1000_i32)*1000000_i32} as date_time)
 	}
 }
 
@@ -562,13 +562,23 @@ mod tests {
 	}
 
 	#[test]
-	fn test_timeval_limits() {
-		let dt = {sec: u32::max_value, usec: u32::max_value} as date_time;
-		log(error, dt);
-		let s = dt.str();
-		log(error, s);
-		let dt = {sec: 0_u32, usec: 0_u32} as date_time;
+	fn test_timespec_limits() {
+		let dt = {sec: 0_i64, nsec: 0_i32} as date_time;
+		log(error, #fmt("test_timespec_limits - 0: %?", dt.str()));
 		assert dt.str() == "1970-01-01 00:00:00";
+		let dt = {sec: 0_i64, nsec: 1000000_i32} as date_time;
+		log(error, #fmt("test_timespec_limits - 1: %?", dt.str()));
+		assert dt.str() == "1970-01-01 00:00:00.001";
+		let d = option::get((0_u32 as date).from_str("9999-12-31"));
+		log(error, #fmt("test_timespec_limits - d: %?", d));
+		let dt = {sec: (d.days() as i64)*86400_i64 - SECS_FROM_UNIX_EPOCH as i64 + 86399_i64, nsec: 999999999_i32} as date_time;
+		log(error, #fmt("test_timespec_limits - max dt: %?", dt));
+		log(error, #fmt("test_timespec_limits - max: %?", dt.str()));
+		assert dt.str() == "9999-12-31 23:59:59.999";
+		let dt = {sec: -(SECS_FROM_UNIX_EPOCH as i64), nsec: 0_i32} as date_time;
+		log(error, #fmt("test_timespec_limits - min dt: %?", dt));
+		log(error, #fmt("test_timespec_limits - min: %?", dt.str()));
+		assert dt.str() == "0001-01-01 00:00:00";
 	}
 
 	#[test]
