@@ -224,7 +224,7 @@ impl of time for u32 {
 	}
 
 	fn secs() -> f64 {
-		self as f64/(self.resolution() as f64)
+		(self as f64)/(self.resolution() as f64)
 	}
 
 	fn from_secs(s: f64) -> option<time> {
