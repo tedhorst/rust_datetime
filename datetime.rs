@@ -199,28 +199,29 @@ impl of date for u32 {
 	}
 }
 
-impl of time for u32 {
+impl of time for u64 {
+	//  nanosecond resolution
 	fn parts() -> option<time_parts> {
-		let r = self.resolution();
-		if self >= 86400_u32*r { ret none }
-		some({hour: (self/3600_u32/r) as u8, minute: (self/60_u32/r % 60_u32) as u8, second: (self/r % 60_u32) as u8, frac: self % r})
+		let r = self.resolution() as u64;
+		if self >= 86400_u64*r { ret none }
+		some({hour: (self/3600_u64/r) as u8, minute: (self/60_u64/r % 60_u64) as u8, second: (self/r % 60_u64) as u8, frac: (self % r) as u32})
 	}
 
 	fn from_parts(parts: time_parts) -> option<time> {
-		let h = parts.hour as u32;
-		let m = parts.minute as u32;
-		let s = parts.second as u32;
-		let f = parts.frac as u32;
+		let h = parts.hour as u64;
+		let m = parts.minute as u64;
+		let s = parts.second as u64;
+		let f = parts.frac as u64;
 		let r = self.resolution();
-		if h >= 24_u32 || m >= 60_u32 || s >= 60_u32 || f >= r {
+		if h >= 24_u64 || m >= 60_u64 || s >= 60_u64 || f >= r as u64 {
 			ret none
 		}
-		some((r*(3600_u32*h + 60_u32*m + s) + f) as time)
+		some((r as u64*(3600_u64*h + 60_u64*m + s) + f) as time)
 	}
 
 	fn str() -> str {
 		let parts = option::get((self as time).parts());
-		#fmt("%02u:%02u:%02u%s", parts.hour as uint, parts.minute as uint, parts.second as uint, if parts.frac == 0_u32 {""} else { #fmt(".%03u", parts.frac as uint) })
+		#fmt("%02u:%02u:%02u%s", parts.hour as uint, parts.minute as uint, parts.second as uint, if parts.frac == 0_u32 {""} else { #fmt(".%09u", parts.frac as uint) })
 	}
 
 	fn secs() -> f64 {
@@ -229,21 +230,21 @@ impl of time for u32 {
 
 	fn from_secs(s: f64) -> option<time> {
 		if s < 0. || s >= 86400. { ret none }
-		some(((self.resolution() as f64)*s) as u32 as time)
+		some(((self.resolution() as f64)*s) as u64 as time)
 	}
 
 	fn millis() -> u32 {
-		self
+		(1000_u64*self/(self.resolution() as u64)) as u32
 	}
 
 	fn from_millis(ms: u32) -> option<time> {
 		if ms >= 86400000_u32 { ret none }
-		some(ms as time)
+		some(((self.resolution() as u64)*(ms as u64)/1000_u64) as time)
 	}
 
 	fn from_str(ds: str) -> option<time> {
 		let sl = str::len(ds);
-		if sl != 8_u && sl != 12_u {
+		if sl < 8_u {
 			ret none
 		}
 		let parts = str::split_char(ds, ':');
@@ -264,19 +265,23 @@ impl of time for u32 {
 			some(ss) { ss as u8 }
 		};
 		let f = if vec::len(fss) == 2_u {
-			alt uint::from_str(fss[1]) {
+			let sfss = if fss[1].len() > 9_u {
+				fss[1].slice(0_u, 9_u)
+			}
+			else { fss[1] };
+			alt uint::from_str(sfss) {
 				none { ret none }
-				some(sf) { sf as u32 }
+				some(sf) { (sf*(int::pow(10, 9_u - str::len(sfss)) as uint)) as u32 }
 			}
 		}
 		else {
 			0_u32
 		};
-		(0_u32 as time).from_parts({hour: h, minute: m, second: s, frac: f})
+		(0_u64 as time).from_parts({hour: h, minute: m, second: s, frac: f})
 	}
 
 	fn resolution() -> u32 {
-		1000_u32
+		1_000_000_000_u32
 	}
 }
 
@@ -302,7 +307,7 @@ impl of date_time for date_time_parts {
 			none { ret none}
 			some(d) { d }
 		};
-		let t = alt (0_u32 as time).from_str(parts[1]) {
+		let t = alt (0_u64 as time).from_str(parts[1]) {
 			none { ret none }
 			some(t) { t }
 		};
@@ -311,12 +316,14 @@ impl of date_time for date_time_parts {
 }
 
 impl of date_time for u64 {
+	//  millisecond resolution
 	fn date() -> date {
 		((self/86400000_u64) as u32) as date
 	}
 
 	fn time() -> time {
-		((self % 86400000_u64) as u32) as time
+		let scale = (1_u64 as time).resolution()/1000_u32;
+		((self % 86400000_u64)*(scale as u64)) as time
 	}
 
 	fn str() -> str {
@@ -332,7 +339,7 @@ impl of date_time for u64 {
 			none { ret none}
 			some(d) { d }
 		};
-		let t = alt (0_u32 as time).from_str(parts[1]) {
+		let t = alt (0_u64 as time).from_str(parts[1]) {
 			none { ret none }
 			some(t) { t }
 		};
@@ -348,7 +355,7 @@ impl of date_time for std::time::timespec {
 	}
 
 	fn time() -> time {
-		(((self.sec % 86400_i64)*1000_i64 + (self.nsec as i64)/1000000_i64) as u32) as time
+		(((self.sec % 86400_i64)*1000000000_i64 + (self.nsec as i64)) as u64) as time
 	}
 
 	fn str() -> str {
@@ -364,11 +371,12 @@ impl of date_time for std::time::timespec {
 			none { ret none}
 			some(d) { d }
 		};
-		let t = alt (0_u32 as time).from_str(parts[1]) {
+		let t = alt (0_u64 as time).from_str(parts[1]) {
 			none { ret none }
 			some(t) { t }
 		};
-		some({sec: ((d.days() as i64)*86400_i64 - SECS_FROM_UNIX_EPOCH as i64 + (t.millis() as i64)/1000_i64), nsec: (t.millis() as i32 % 1000_i32)*1000000_i32} as date_time)
+		let tp = option::get(t.parts());
+		some({sec: ((d.days() as i64)*86400_i64 - SECS_FROM_UNIX_EPOCH as i64 + (t.millis() as i64)/1000_i64), nsec: tp.frac as i32} as date_time)
 	}
 }
 
@@ -459,17 +467,17 @@ mod tests {
 	fn test_all_times() {
 		let rng = rand::rng();
 		let mut cnt = 0_u;
-		let mut i = 0_u32;
+		let mut i = 0_u64;
 		let mut t = i as time;
-		while i < 86400000_u32 {
+		while i < 86400000000000_u64 {
 			log(debug, i);
 			t = i as time;
 			let parts = option::get(t.parts());
 			log(debug, parts);
 			let t2 = option::get(t.from_parts(parts));
 			let i2 = t2.millis();
-			assert i2 == i;
-			i += rng.next() % 100_u32;
+			assert i2 == (1000_u64*i/(t2.resolution() as u64)) as u32;
+			i += (rng.next() % 100000000_u32) as u64;
 			cnt += 1_u;
 		}
 		log(error, #fmt("tested %u times, ending with: %s", cnt, t.str()));
@@ -477,54 +485,58 @@ mod tests {
 
 	#[test]
 	fn test_time_str() {
-		let x = option::get((0_u32 as time).from_parts({hour: 0_u8, minute: 0_u8, second: 0_u8, frac: 0_u32}));
+		let x = option::get((0_u64 as time).from_parts({hour: 0_u8, minute: 0_u8, second: 0_u8, frac: 0_u32}));
+		log(error, ("x", x));
+		log(error, ("x.str()", x.str()));
 		assert x.str() == "00:00:00";
-		assert (0_u32 as time).str() == "00:00:00";
-		assert (1_u32 as time).str() == "00:00:00.001";
-		let x = option::get((0_u32 as time).from_parts({hour: 23_u8, minute: 59_u8, second: 59_u8, frac: 999_u32}));
-		assert x.str() == "23:59:59.999";
+		assert (0_u64 as time).str() == "00:00:00";
+		let xs = (1000000_u64 as time);
+		log(error, ("xs", xs, "xs.str()", xs.str()));
+		assert xs.str() == "00:00:00.001000000";
+		let x = option::get((0_u64 as time).from_parts({hour: 23_u8, minute: 59_u8, second: 59_u8, frac: 999999999_u32}));
+		assert x.str() == "23:59:59.999999999";
+		assert option::get((0_u64 as time).from_str("20:22:11.33")).str() == "20:22:11.330000000";
+		assert option::get((0_u64 as time).from_str("20:22:11.123456789")).str() == "20:22:11.123456789";
+		let ts = option::get((0_u64 as time).from_str("20:22:11.1234567891")).str();
+		log(error, ("ts 1", ts));
+		assert ts == "20:22:11.123456789";
+		assert option::get((0_u64 as time).from_str("20:22:11.1234567899")).str() == "20:22:11.123456789";
 	}
 
 	#[test]
 	#[should_fail]
 	fn test_low_time_limit() {
-		option::get((-1 as u32 as time).parts());
+		option::get((-1 as u64 as time).parts());
 	}
 
 	#[test]
 	#[should_fail]
 	fn test_high_time_limit() {
-		option::get((86400000_u32 as time).parts());
+		option::get((86400000000000_u64 as time).parts());
 	}
 
 	#[test]
 	#[should_fail]
 	fn test_bad_time_str1() {
-		option::get((0_u32 as time).from_str("2100-02-28"));
+		option::get((0_u64 as time).from_str("2100-02-28"));
 	}
 
 	#[test]
 	#[should_fail]
 	fn test_bad_time_str2() {
-		option::get((0_u32 as time).from_str("24:22:11"));
+		option::get((0_u64 as time).from_str("24:22:11"));
 	}
 
 	#[test]
 	#[should_fail]
 	fn test_bad_time_str3() {
-		option::get((0_u32 as time).from_str("20:60:11"));
+		option::get((0_u64 as time).from_str("20:60:11"));
 	}
 
 	#[test]
 	#[should_fail]
 	fn test_bad_time_str4() {
-		option::get((0_u32 as time).from_str("20:22:60"));
-	}
-
-	#[test]
-	#[should_fail]
-	fn test_bad_time_str5() {
-		option::get((0_u32 as time).from_str("20:22:11.33"));
+		option::get((0_u64 as time).from_str("20:22:60"));
 	}
 
 	#[test]
@@ -550,14 +562,17 @@ mod tests {
 
 	#[test]
 	fn test_now() {
-		let dt = std::time::get_time() as date_time;
-		log(error, dt);
+		let st = std::time::get_time();
+		let dt = st as date_time;
+		log(error, ("st", st, "dt", dt));
+		let stm = std::time::at_utc(st);
+		log(error, ("stm", stm));
 		let s = dt.str();
-		log(error, s);
+		log(error, ("s", s));
 		let dt2 = option::get(dt.from_str(s));
-		log(error, dt2);
+		log(error, ("dt2", dt2));
 		let s2 = dt2.str();
-		log(error, s2);
+		log(error, ("s2", s2));
 		assert s == s2;
 	}
 
@@ -568,13 +583,13 @@ mod tests {
 		assert dt.str() == "1970-01-01 00:00:00";
 		let dt = {sec: 0_i64, nsec: 1000000_i32} as date_time;
 		log(error, #fmt("test_timespec_limits - 1: %?", dt.str()));
-		assert dt.str() == "1970-01-01 00:00:00.001";
+		assert dt.str() == "1970-01-01 00:00:00.001000000";
 		let d = option::get((0_u32 as date).from_str("9999-12-31"));
 		log(error, #fmt("test_timespec_limits - d: %?", d));
 		let dt = {sec: (d.days() as i64)*86400_i64 - SECS_FROM_UNIX_EPOCH as i64 + 86399_i64, nsec: 999999999_i32} as date_time;
 		log(error, #fmt("test_timespec_limits - max dt: %?", dt));
 		log(error, #fmt("test_timespec_limits - max: %?", dt.str()));
-		assert dt.str() == "9999-12-31 23:59:59.999";
+		assert dt.str() == "9999-12-31 23:59:59.999999999";
 		let dt = {sec: -(SECS_FROM_UNIX_EPOCH as i64), nsec: 0_i32} as date_time;
 		log(error, #fmt("test_timespec_limits - min dt: %?", dt));
 		log(error, #fmt("test_timespec_limits - min: %?", dt.str()));
@@ -583,40 +598,39 @@ mod tests {
 
 	#[test]
 	fn test_date_time_str() {
-		let dp = {date: 0_u32 as date, time: 0_u32 as time};
+		let dp = {date: 0_u32 as date, time: 0_u64 as time};
 		assert dp.str() == "0001-01-01 00:00:00";
 		assert (0_u64 as date_time).str() == "0001-01-01 00:00:00";
-		assert {date: 3652058_u32 as date, time: 86399999_u32 as time}.str() == "9999-12-31 23:59:59.999";
-		assert (315537897599999_u64 as date_time).str() == "9999-12-31 23:59:59.999";
+		let dts = {date: 3652058_u32 as date, time: 86399999999999_u64 as time}.str();
+		log(error, dts);
+		assert dts == "9999-12-31 23:59:59.999999999";
+		let dts = (315537897599999_u64 as date_time).str();
+		log(error, dts);
+		assert dts == "9999-12-31 23:59:59.999000000";
 		assert option::get(dp.from_str("0001-01-01 00:00:00")).str() == "0001-01-01 00:00:00";
-		assert option::get(dp.from_str("9999-12-31 23:59:59.999")).str() == "9999-12-31 23:59:59.999";
+		assert option::get(dp.from_str("9999-12-31 23:59:59.999")).str() == "9999-12-31 23:59:59.999000000";
+		let dp = {date: 0_u32 as date, time: 0_u64 as time};
+		assert option::get(dp.from_str("9999-12-31 23:59:58.9")).str() == "9999-12-31 23:59:58.900000000";
 	}
 
 	#[test]
 	#[should_fail]
 	fn test_bad_date_time_str1() {
-		let dp = {date: 0_u32 as date, time: 0_u32 as time};
+		let dp = {date: 0_u32 as date, time: 0_u64 as time};
 		option::get(dp.from_str("9999-12-31T23:59:59"));
 	}
 
 	#[test]
 	#[should_fail]
 	fn test_bad_date_time_str2() {
-		let dp = {date: 0_u32 as date, time: 0_u32 as time};
+		let dp = {date: 0_u32 as date, time: 0_u64 as time};
 		option::get(dp.from_str("999-12-31 23:59:59"));
 	}
 
 	#[test]
 	#[should_fail]
 	fn test_bad_date_time_str3() {
-		let dp = {date: 0_u32 as date, time: 0_u32 as time};
+		let dp = {date: 0_u32 as date, time: 0_u64 as time};
 		option::get(dp.from_str("9999-12-31 23:59:9"));
-	}
-
-	#[test]
-	#[should_fail]
-	fn test_bad_date_time_str4() {
-		let dp = {date: 0_u32 as date, time: 0_u32 as time};
-		option::get(dp.from_str("9999-12-31 23:59:58.9"));
 	}
 }
