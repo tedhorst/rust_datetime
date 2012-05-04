@@ -1,5 +1,7 @@
 use std;
 
+import std::time::tm;
+
 type date_parts = {year: u16, month: u8, day: u8, doy: u16};
 
 type time_parts = {hour: u8, minute: u8, second: u8, frac: u32};
@@ -566,9 +568,13 @@ mod tests {
 		let dt = st as date_time;
 		log(error, ("st", st, "dt", dt));
 		let stm = std::time::at_utc(st);
+		let itmfs = stm.strftime("%Y-%m-%d %H:%M:%S");
+		let tmfs = #fmt("%s.%09i", itmfs, stm.tm_nsec as int);
+		log(error, ("tmfs", tmfs));
 		log(error, ("stm", stm));
 		let s = dt.str();
 		log(error, ("s", s));
+		assert s == tmfs;
 		let dt2 = option::get(dt.from_str(s));
 		log(error, ("dt2", dt2));
 		let s2 = dt2.str();
