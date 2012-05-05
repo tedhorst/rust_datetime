@@ -33,8 +33,6 @@ iface time {
 iface date_time {
 	fn date() -> date;
 	fn time() -> time;
-	fn str() -> str;
-	fn from_str(ds: str) -> option<date_time>;
 }
 
 fn leapyear(y: u16) -> bool { y % 4_u16 == 0_u16 && (y % 100_u16 != 0_u16 || y % 400_u16 == 0_u16) }
@@ -295,9 +293,65 @@ impl of date_time for date_time_parts {
 	fn time() -> time {
 		self.time
 	}
+}
+
+impl of date_time for u64 {
+	//  millisecond resolution
+	fn date() -> date {
+		((self/86400000_u64) as u32) as date
+	}
+
+	fn time() -> time {
+		let scale = (1_u64 as time).resolution()/1000_u32;
+		((self % 86400000_u64)*(scale as u64)) as time
+	}
+}
+
+const SECS_FROM_UNIX_EPOCH: u64 = 62135596800_u64;
+
+impl of date_time for std::time::timespec {
+	fn date() -> date {
+		(((self.sec as u64 + SECS_FROM_UNIX_EPOCH)/86400_u64) as u32) as date
+	}
+
+	fn time() -> time {
+		(((self.sec % 86400_i64)*1000000000_i64 + (self.nsec as i64)) as u64) as time
+	}
+}
+
+impl dtm for date_time {
+	fn tm() -> std::time::tm {
+		let dp = option::get(self.date().parts());
+		let dt = option::get(self.time().parts());
+		{ tm_sec: dt.second as i32,
+		  tm_min: dt.minute as i32,
+		  tm_hour: dt.hour as i32,
+		  tm_mday: dp.day as i32,
+		  tm_mon: dp.month as i32 - 1_i32,
+		  tm_year: (dp.year - 1900_u16) as i32,
+		  tm_wday: ((self.date().days() + 1_u32) % 7_u32) as i32,
+		  tm_yday: (dp.doy - 1_u16) as i32,
+		  tm_isdst: 0_i32,
+		  tm_gmtoff: 0_i32,
+		  tm_zone: "UTC",
+		  tm_nsec: dt.frac as i32
+		}
+	}
+
+	fn from_tm(tm: std::time::tm) -> option<date_time> {
+		let d = alt (0_u32 as date).from_parts({ year:(tm.tm_year + 1900_i32) as u16, month:(tm.tm_mon + 1_i32) as u8, day:tm.tm_mday as u8, doy: 0_u16}) {
+			none { ret none }
+			some(d) { d }
+		};
+		let t = alt (0_u64 as time).from_parts({ hour:tm.tm_hour as u8, minute:tm.tm_min as u8, second:tm.tm_sec as u8, frac:tm.tm_nsec as u32}) {
+			none { ret none }
+			some(t) { t }
+		};
+		some({ date:d, time:t} as date_time)
+	}
 
 	fn str() -> str {
-		#fmt("%s %s", self.date.str(), self.time.str())
+		#fmt("%s %s", self.date().str(), self.time().str())
 	}
 
 	fn from_str(ds: str) -> option<date_time> {
@@ -314,71 +368,6 @@ impl of date_time for date_time_parts {
 			some(t) { t }
 		};
 		some({date: d, time: t} as date_time)
-	}
-}
-
-impl of date_time for u64 {
-	//  millisecond resolution
-	fn date() -> date {
-		((self/86400000_u64) as u32) as date
-	}
-
-	fn time() -> time {
-		let scale = (1_u64 as time).resolution()/1000_u32;
-		((self % 86400000_u64)*(scale as u64)) as time
-	}
-
-	fn str() -> str {
-		#fmt("%s %s", self.date().str(), self.time().str())
-	}
-
-	fn from_str(ds: str) -> option<date_time> {
-		let parts = str::split_char(ds, ' ');
-		if vec::len(parts) != 2_u {
-			ret none
-		}
-		let d = alt (0_u32 as date).from_str(parts[0]) {
-			none { ret none}
-			some(d) { d }
-		};
-		let t = alt (0_u64 as time).from_str(parts[1]) {
-			none { ret none }
-			some(t) { t }
-		};
-		some(((d.days() as u64)*86400000_u64 + (t.millis() as u64)) as date_time)
-	}
-}
-
-const SECS_FROM_UNIX_EPOCH: u64 = 62135596800_u64;
-
-impl of date_time for std::time::timespec {
-	fn date() -> date {
-		(((self.sec as u64 + SECS_FROM_UNIX_EPOCH)/86400_u64) as u32) as date
-	}
-
-	fn time() -> time {
-		(((self.sec % 86400_i64)*1000000000_i64 + (self.nsec as i64)) as u64) as time
-	}
-
-	fn str() -> str {
-		#fmt("%s %s", self.date().str(), self.time().str())
-	}
-
-	fn from_str(ds: str) -> option<date_time> {
-		let parts = str::split_char(ds, ' ');
-		if vec::len(parts) != 2_u {
-			ret none
-		}
-		let d = alt (0_u32 as date).from_str(parts[0]) {
-			none { ret none}
-			some(d) { d }
-		};
-		let t = alt (0_u64 as time).from_str(parts[1]) {
-			none { ret none }
-			some(t) { t }
-		};
-		let tp = option::get(t.parts());
-		some({sec: ((d.days() as i64)*86400_i64 - SECS_FROM_UNIX_EPOCH as i64 + (t.millis() as i64)/1000_i64), nsec: tp.frac as i32} as date_time)
 	}
 }
 
@@ -604,10 +593,10 @@ mod tests {
 
 	#[test]
 	fn test_date_time_str() {
-		let dp = {date: 0_u32 as date, time: 0_u64 as time};
+		let dp = {date: 0_u32 as date, time: 0_u64 as time} as date_time;
 		assert dp.str() == "0001-01-01 00:00:00";
 		assert (0_u64 as date_time).str() == "0001-01-01 00:00:00";
-		let dts = {date: 3652058_u32 as date, time: 86399999999999_u64 as time}.str();
+		let dts = ({date: 3652058_u32 as date, time: 86399999999999_u64 as time} as date_time).str();
 		log(error, dts);
 		assert dts == "9999-12-31 23:59:59.999999999";
 		let dts = (315537897599999_u64 as date_time).str();
@@ -615,28 +604,44 @@ mod tests {
 		assert dts == "9999-12-31 23:59:59.999000000";
 		assert option::get(dp.from_str("0001-01-01 00:00:00")).str() == "0001-01-01 00:00:00";
 		assert option::get(dp.from_str("9999-12-31 23:59:59.999")).str() == "9999-12-31 23:59:59.999000000";
-		let dp = {date: 0_u32 as date, time: 0_u64 as time};
+		let dp = {date: 0_u32 as date, time: 0_u64 as time} as date_time;
 		assert option::get(dp.from_str("9999-12-31 23:59:58.9")).str() == "9999-12-31 23:59:58.900000000";
 	}
 
 	#[test]
 	#[should_fail]
 	fn test_bad_date_time_str1() {
-		let dp = {date: 0_u32 as date, time: 0_u64 as time};
+		let dp = {date: 0_u32 as date, time: 0_u64 as time} as date_time;
 		option::get(dp.from_str("9999-12-31T23:59:59"));
 	}
 
 	#[test]
 	#[should_fail]
 	fn test_bad_date_time_str2() {
-		let dp = {date: 0_u32 as date, time: 0_u64 as time};
+		let dp = {date: 0_u32 as date, time: 0_u64 as time} as date_time;
 		option::get(dp.from_str("999-12-31 23:59:59"));
 	}
 
 	#[test]
 	#[should_fail]
 	fn test_bad_date_time_str3() {
-		let dp = {date: 0_u32 as date, time: 0_u64 as time};
+		let dp = {date: 0_u32 as date, time: 0_u64 as time} as date_time;
 		option::get(dp.from_str("9999-12-31 23:59:9"));
+	}
+
+	#[test]
+	fn test_tm() {
+		let st = std::time::get_time();
+		let dt = st as date_time;
+		let stm = std::time::at_utc(st);
+		log(error, ("test_tm", "stm", stm));
+		let dtm = dt.tm();
+		log(error, ("test_tm", "dtm", dtm));
+		assert dtm == stm;
+		let dt2 = option::get(dt.from_tm(stm));
+		log(error, ("test_tm", "dt2", dt2));
+		let dtm2 = dt2.tm();
+		log(error, ("test_tm", "dtm2", dtm2));
+		assert dtm == dtm2;
 	}
 }
