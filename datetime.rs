@@ -159,7 +159,7 @@ impl of time for i64 {
 	}
 
 	fn from_timespec(ts: std::time::timespec) -> time {
-		((ts.sec % 86400)*1000000000_i64 + ts.nsec as i64) as time
+		((ts.sec % 86400_i64)*1000000000_i64 + ts.nsec as i64) as time
 	}
 
 	fn tm() -> std::time::tm {
@@ -264,7 +264,7 @@ impl dtm for date_time {
 	fn from_str(ds: str) -> result<date_time, str> {
 		alt std::time::strptime(ds, "%Y-%m-%d %H:%M:%S") {
 			ok(tm) { ok(({ sec: 0_i64, nsec: 0_i32 } as date_time).from_tm(tm)) }
-			err(es) { err(es) }
+			err(es) { err(copy es) }
 		}
 	}
 }
@@ -277,12 +277,12 @@ mod tests {
 			ok(dt) {
 				let dts = dt.str();
 				if s != dts {
-					log(error, ("test_dt_str", s, dts));
+					log(error, ("test_dt_str", copy s, dts));
 					fail
 				}
 			}
 			err(es) {
-				log(error, ("test_dt_str", s, es));
+				log(error, ("test_dt_str", copy s, copy es));
 				fail
 			}
 		}
@@ -305,18 +305,18 @@ mod tests {
 				let dtm = dt.tm();
 				let stm = std::time::at_utc(dt.timespec());
 				if stm != dtm {
-					log(error, ("test_std_time", s, dtm, stm));
+					log(error, ("test_std_time", copy s, dtm, stm));
 					fail
 				}
 				let dts = dt.timespec();
 				let sts = dtm.to_timespec();
 				if dts != sts {
-					log(error, ("test_std_time", s, dts, sts));
+					log(error, ("test_std_time", copy s, dts, sts));
 					fail
 				}
 			}
 			err(es) {
-				log(error, ("test_std_time", s, es));
+				log(error, ("test_std_time", copy s, copy es));
 				fail
 			}
 		}
