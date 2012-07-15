@@ -142,7 +142,7 @@ impl of date for i32 {
 		  tm_yday: dp.yday,
 		  tm_isdst: 0,
 		  tm_gmtoff: 0,
-		  tm_zone: "UTC",
+		  tm_zone: ~"UTC",
 		  tm_nsec: 0
 		}
 	}
@@ -174,7 +174,7 @@ impl of time for i64 {
 		  tm_yday: 0,
 		  tm_isdst: 0,
 		  tm_gmtoff: 0,
-		  tm_zone: "UTC",
+		  tm_zone: ~"UTC",
 		  tm_nsec: (self % 1000000000) as i32
 		}
 	}
@@ -208,7 +208,7 @@ impl of date_time for i64 {
 		  tm_yday: dp.yday,
 		  tm_isdst: 0,
 		  tm_gmtoff: 0,
-		  tm_zone: "UTC",
+		  tm_zone: ~"UTC",
 		  tm_nsec: 1000000*(self % 1000) as i32
 		}
 	}
@@ -243,7 +243,7 @@ impl of date_time for std::time::timespec {
 		  tm_yday: dp.yday,
 		  tm_isdst: 0,
 		  tm_gmtoff: 0,
-		  tm_zone: "UTC",
+		  tm_zone: ~"UTC",
 		  tm_nsec: self.nsec
 		}
 	}
@@ -256,13 +256,13 @@ impl of date_time for std::time::timespec {
 }
 
 impl dtm for date_time {
-	fn str() -> str {
+	fn str() -> ~str {
 		let tm = self.tm();
-		#fmt("%s%s", tm.strftime("%Y-%m-%d %H:%M:%S"), if tm.tm_nsec != 0 { #fmt("%09i", tm.tm_nsec as int) } else { "" })
+		#fmt("%s%s", tm.strftime(~"%Y-%m-%d %H:%M:%S"), if tm.tm_nsec != 0 { #fmt("%09i", tm.tm_nsec as int) } else { ~"" })
 	}
 
-	fn from_str(ds: str) -> result<date_time, str> {
-		alt std::time::strptime(ds, "%Y-%m-%d %H:%M:%S") {
+	fn from_str(ds: ~str) -> result<date_time, ~str> {
+		alt std::time::strptime(ds, ~"%Y-%m-%d %H:%M:%S") {
 			ok(tm) { ok(({ sec: 0_i64, nsec: 0_i32 } as date_time).from_tm(tm)) }
 			err(es) { err(copy es) }
 		}
@@ -272,7 +272,7 @@ impl dtm for date_time {
 
 #[cfg(test)]
 mod tests {
-	fn test_dt_str(s: str) {
+	fn test_dt_str(s: ~str) {
 		alt ({ sec: 0_i64, nsec: 0_i32 } as date_time).from_str(s) {
 			ok(dt) {
 				let dts = dt.str();
@@ -290,16 +290,16 @@ mod tests {
 
 	#[test]
 	fn test_dt_limits() {
-		test_dt_str("2012-05-07 09:56:33");
-		test_dt_str("1000-01-01 00:00:00");
-		test_dt_str("9999-12-31 23:59:59");
-		test_dt_str("1900-02-28 23:59:59");
-		test_dt_str("1900-03-01 00:00:00");
-		test_dt_str("2000-02-29 23:59:59");
-		test_dt_str("2000-03-01 00:00:00");
+		test_dt_str(~"2012-05-07 09:56:33");
+		test_dt_str(~"1000-01-01 00:00:00");
+		test_dt_str(~"9999-12-31 23:59:59");
+		test_dt_str(~"1900-02-28 23:59:59");
+		test_dt_str(~"1900-03-01 00:00:00");
+		test_dt_str(~"2000-02-29 23:59:59");
+		test_dt_str(~"2000-03-01 00:00:00");
 	}
 
-	fn test_std_time(s: str) {
+	fn test_std_time(s: ~str) {
 		alt ({ sec: 0_i64, nsec: 0_i32 } as date_time).from_str(s) {
 			ok(dt) {
 				let dtm = dt.tm();
@@ -324,31 +324,31 @@ mod tests {
 
 	#[test]
 	fn test_std_limits() {
-		test_std_time("2012-05-07 09:56:33");
-		test_std_time("1901-12-13 20:45:52");
-		test_std_time("9999-12-31 23:59:59");
-		test_std_time("2100-02-28 23:59:59");
-		test_std_time("2100-03-01 00:00:00");
-		test_std_time("2000-02-29 23:59:59");
-		test_std_time("2000-03-01 00:00:00");
+		test_std_time(~"2012-05-07 09:56:33");
+		test_std_time(~"1901-12-13 20:45:52");
+		test_std_time(~"9999-12-31 23:59:59");
+		test_std_time(~"2100-02-28 23:59:59");
+		test_std_time(~"2100-03-01 00:00:00");
+		test_std_time(~"2000-02-29 23:59:59");
+		test_std_time(~"2000-03-01 00:00:00");
 	}
 
 	#[test]
 	#[should_fail]
 	fn test_std_bad_low_limit() {
-		test_std_time("1901-12-13 20:45:51");
+		test_std_time(~"1901-12-13 20:45:51");
 	}
 
 	#[test]
 	#[should_fail]
 	fn test_bad_leap() {
-		test_dt_str("2100-02-29 23:59:59");
+		test_dt_str(~"2100-02-29 23:59:59");
 	}
 
 	#[test]
 	#[should_fail]
 	fn test_std_bad_hi_limit() {
-		test_std_time("10000-01-01 00:00:00");
+		test_std_time(~"10000-01-01 00:00:00");
 	}
 
 	fn test_funcs(in: i32) {
