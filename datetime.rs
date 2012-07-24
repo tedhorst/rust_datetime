@@ -1,6 +1,7 @@
 use std;
 
 import std::time::tm;
+import std::time::tm_;
 import result::{result, ok, err, extensions};
 
 iface date {
@@ -132,7 +133,7 @@ impl of date for i32 {
 
 	fn tm() -> std::time::tm {
 		let dp = date_from_days(self);
-		{ tm_sec: 0,
+		tm_({ tm_sec: 0,
 		  tm_min: 0,
 		  tm_hour: 0,
 		  tm_mday: dp.mday,
@@ -144,7 +145,7 @@ impl of date for i32 {
 		  tm_gmtoff: 0,
 		  tm_zone: ~"UTC",
 		  tm_nsec: 0
-		}
+		})
 	}
 
 	fn from_tm(tm: std::time::tm) -> date {
@@ -164,7 +165,7 @@ impl of time for i64 {
 
 	fn tm() -> std::time::tm {
 		let s = (self % 86400000000000)/1000000000;
-		{ tm_sec: (s % 60) as i32,
+		tm_({ tm_sec: (s % 60) as i32,
 		  tm_min: ((s/60) % 60) as i32,
 		  tm_hour: (s/3600) as i32,
 		  tm_mday: 1,
@@ -176,7 +177,7 @@ impl of time for i64 {
 		  tm_gmtoff: 0,
 		  tm_zone: ~"UTC",
 		  tm_nsec: (self % 1000000000) as i32
-		}
+		})
 	}
 
 	fn from_tm(tm: std::time::tm) -> time {
@@ -198,7 +199,7 @@ impl of date_time for i64 {
 		let d = self/86400000;
 		let dp = date_from_days(d as i32);
 		let s = (self % 86400000)/1000;
-		{ tm_sec: (s % 60) as i32,
+		tm_({ tm_sec: (s % 60) as i32,
 		  tm_min: ((s/60) % 60) as i32,
 		  tm_hour: (s/3600) as i32,
 		  tm_mday: dp.mday,
@@ -210,7 +211,7 @@ impl of date_time for i64 {
 		  tm_gmtoff: 0,
 		  tm_zone: ~"UTC",
 		  tm_nsec: 1000000*(self % 1000) as i32
-		}
+		})
 	}
 
 	fn from_tm(tm: std::time::tm) -> date_time {
@@ -233,7 +234,7 @@ impl of date_time for std::time::timespec {
 		let d = (self.sec + SECS_FROM_UNIX_EPOCH)/86400;
 		let dp = date_from_days(d as i32);
 		let s = (self.sec + SECS_FROM_UNIX_EPOCH) % 86400;
-		{ tm_sec: (s % 60) as i32,
+		tm_({ tm_sec: (s % 60) as i32,
 		  tm_min: ((s/60) % 60) as i32,
 		  tm_hour: (s/3600) as i32,
 		  tm_mday: dp.mday,
@@ -245,7 +246,7 @@ impl of date_time for std::time::timespec {
 		  tm_gmtoff: 0,
 		  tm_zone: ~"UTC",
 		  tm_nsec: self.nsec
-		}
+		})
 	}
 
 	fn from_tm(tm: std::time::tm) -> date_time {
