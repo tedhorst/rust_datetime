@@ -4,21 +4,21 @@ import std::time::tm;
 import std::time::tm_;
 import result::{result, ok, err, extensions};
 
-iface date {
+trait date {
 	fn timespec() -> std::time::timespec;
 	fn from_timespec(ts: std::time::timespec) -> date;
 	fn tm() -> std::time::tm;
 	fn from_tm(tm: std::time::tm) -> date;
 }
 
-iface time {
+trait time {
 	fn timespec() -> std::time::timespec;
 	fn from_timespec(ts: std::time::timespec) -> time;
 	fn tm() -> std::time::tm;
 	fn from_tm(tm: std::time::tm) -> time;
 }
 
-iface date_time {
+trait date_time {
 	fn timespec() -> std::time::timespec;
 	fn from_timespec(ts: std::time::timespec) -> date_time;
 	fn tm() -> std::time::tm;
