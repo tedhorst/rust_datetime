@@ -278,12 +278,12 @@ mod tests {
 			ok(dt) {
 				let dts = dt.str();
 				if s != dts {
-					log(error, ("test_dt_str", copy s, dts));
+					log(error, (~"test_dt_str", copy s, dts));
 					fail
 				}
 			}
 			err(es) {
-				log(error, ("test_dt_str", copy s, copy es));
+				log(error, (~"test_dt_str", copy s, copy es));
 				fail
 			}
 		}
@@ -306,18 +306,18 @@ mod tests {
 				let dtm = dt.tm();
 				let stm = std::time::at_utc(dt.timespec());
 				if stm != dtm {
-					log(error, ("test_std_time", copy s, dtm, stm));
+					log(error, (~"test_std_time", copy s, dtm, stm));
 					fail
 				}
 				let dts = dt.timespec();
 				let sts = dtm.to_timespec();
 				if dts != sts {
-					log(error, ("test_std_time", copy s, dts, sts));
+					log(error, (~"test_std_time", copy s, dts, sts));
 					fail
 				}
 			}
 			err(es) {
-				log(error, ("test_std_time", copy s, copy es));
+				log(error, (~"test_std_time", copy s, copy es));
 				fail
 			}
 		}
