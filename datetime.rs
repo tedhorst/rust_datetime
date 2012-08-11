@@ -2,7 +2,7 @@ use std;
 
 import std::time::tm;
 import std::time::tm_;
-import result::{result, ok, err, extensions};
+import result::{result, ok, err};
 
 trait date {
 	fn timespec() -> std::time::timespec;
@@ -25,42 +25,47 @@ trait date_time {
 	fn from_tm(tm: std::time::tm) -> date_time;
 }
 
+trait date_str {
+	fn str() -> ~str;
+	fn from_str(ds: ~str) -> result<date_time, ~str>;
+}
+
 const SECS_FROM_UNIX_EPOCH: i64 = 62135596800;
 
 fn leapyear(y: i32) -> bool { y % 4 == 0 && (y % 100 != 0 || y % 400 == 0) }
 
 fn month_lookup(doy: i32, ly: bool) -> i32 {
-	alt ly {
-		true {
-			alt check doy {
-				0 to 30 { 1 }
-				31 to 59 { 2 }
-				60 to 90 { 3 }
-				91 to 120 { 4 }
-				121 to 151 { 5 }
-				152 to 181 { 6 }
-				182 to 212 { 7 }
-				213 to 243 { 8 }
-				244 to 273 { 9 }
-				274 to 304 { 10 }
-				305 to 334 { 11 }
-				335 to 365 { 12 }
+	match ly {
+		true => {
+			match check doy {
+				0 to 30 => { 1 }
+				31 to 59 => { 2 }
+				60 to 90 => { 3 }
+				91 to 120 => { 4 }
+				121 to 151 => { 5 }
+				152 to 181 => { 6 }
+				182 to 212 => { 7 }
+				213 to 243 => { 8 }
+				244 to 273 => { 9 }
+				274 to 304 => { 10 }
+				305 to 334 => { 11 }
+				335 to 365 => { 12 }
 			}
 		}
-		false {
-			alt check doy {
-				0 to 30 { 1 }
-				31 to 58 { 2 }
-				59 to 89 { 3 }
-				90 to 119 { 4 }
-				120 to 150 { 5 }
-				151 to 180 { 6 }
-				181 to 211 { 7 }
-				212 to 242 { 8 }
-				243 to 272 { 9 }
-				273 to 303 { 10 }
-				304 to 333 { 11 }
-				334 to 364 { 12 }
+		false => {
+			match check doy {
+				0 to 30 => { 1 }
+				31 to 58 => { 2 }
+				59 to 89 => { 3 }
+				90 to 119 => { 4 }
+				120 to 150 => { 5 }
+				151 to 180 => { 6 }
+				181 to 211 => { 7 }
+				212 to 242 => { 8 }
+				243 to 272 => { 9 }
+				273 to 303 => { 10 }
+				304 to 333 => { 11 }
+				334 to 364 => { 12 }
 			}
 		}
 	}
@@ -68,28 +73,28 @@ fn month_lookup(doy: i32, ly: bool) -> i32 {
 
 fn accume_days(m: i32, ly: bool) -> i32 {
 	let xtra = (ly && m > 2) as i32;
-	let rv = alt check m {
-		1 { 0 }
-		2 { 31 }
-		3 { 59 }
-		4 { 90 }
-		5 { 120 }
-		6 { 151 }
-		7 { 181 }
-		8 { 212 }
-		9 { 243 }
-		10 { 273 }
-		11 { 304 }
-		12 { 334 }
+	let rv = match check m {
+		1 => { 0 }
+		2 => { 31 }
+		3 => { 59 }
+		4 => { 90 }
+		5 => { 120 }
+		6 => { 151 }
+		7 => { 181 }
+		8 => { 212 }
+		9 => { 243 }
+		10 => { 273 }
+		11 => { 304 }
+		12 => { 334 }
 	};
 	rv + xtra
 }
 
 fn month_length(m: i32, ly: bool) -> i32 {
-	alt check m {
-		1 | 3 | 5 | 7 | 8 | 10 | 12 { 31 }
-		2 { alt ly { true { 29 } false { 28 }}}
-		4 | 6 | 9 | 11 { 30 }
+	match check m {
+		1 | 3 | 5 | 7 | 8 | 10 | 12 => { 31 }
+		2 => { match ly { true => { 29 } false => { 28 }}}
+		4 | 6 | 9 | 11 => { 30 }
 	}
 }
 
@@ -121,7 +126,7 @@ fn days_from_date(y: i32, m: i32, d: i32) -> i32 {
 	365*ym1 + ym1/4 - ym1/100 + ym1/400 + accume_days(m, ly) + d - 1
 }
 
-impl of date for i32 {
+impl i32: date {
 	//  days since 0001-01-01
 	fn timespec() -> std::time::timespec {
 		{ sec: self as i64*86400 - SECS_FROM_UNIX_EPOCH, nsec: 0 }
@@ -153,7 +158,7 @@ impl of date for i32 {
 	}
 }
 
-impl of time for i64 {
+impl i64: time {
 	//  nanosecond resolution
 	fn timespec() -> std::time::timespec {
 		{ sec: (self % 86400000000000)/1000000000, nsec: (self % 1000000000) as i32 }
@@ -185,7 +190,7 @@ impl of time for i64 {
 	}
 }
 
-impl of date_time for i64 {
+impl i64: date_time {
 	//  milliseconds since 0001-01-01
 	fn timespec() -> std::time::timespec {
 		{ sec: self/1000 - SECS_FROM_UNIX_EPOCH, nsec: ((self % 1000)*1000000) as i32 }
@@ -221,7 +226,7 @@ impl of date_time for i64 {
 	}
 }
 
-impl of date_time for std::time::timespec {
+impl std::time::timespec: date_time {
 	fn timespec() -> std::time::timespec {
 		self
 	}
@@ -256,16 +261,16 @@ impl of date_time for std::time::timespec {
 	}
 }
 
-impl dtm for date_time {
+impl date_time: date_str {
 	fn str() -> ~str {
 		let tm = self.tm();
 		#fmt("%s%s", tm.strftime(~"%Y-%m-%d %H:%M:%S"), if tm.tm_nsec != 0 { #fmt("%09i", tm.tm_nsec as int) } else { ~"" })
 	}
 
 	fn from_str(ds: ~str) -> result<date_time, ~str> {
-		alt std::time::strptime(ds, ~"%Y-%m-%d %H:%M:%S") {
-			ok(tm) { ok(({ sec: 0_i64, nsec: 0_i32 } as date_time).from_tm(tm)) }
-			err(es) { err(copy es) }
+		match std::time::strptime(ds, ~"%Y-%m-%d %H:%M:%S") {
+			ok(tm) => { ok(({ sec: 0_i64, nsec: 0_i32 } as date_time).from_tm(tm)) }
+			err(es) => { err(copy es) }
 		}
 	}
 }
@@ -274,15 +279,15 @@ impl dtm for date_time {
 #[cfg(test)]
 mod tests {
 	fn test_dt_str(s: ~str) {
-		alt ({ sec: 0_i64, nsec: 0_i32 } as date_time).from_str(s) {
-			ok(dt) {
+		match ({ sec: 0_i64, nsec: 0_i32 } as date_time).from_str(s) {
+			ok(dt) => {
 				let dts = dt.str();
 				if s != dts {
 					log(error, (~"test_dt_str", copy s, dts));
 					fail
 				}
 			}
-			err(es) {
+			err(es) => {
 				log(error, (~"test_dt_str", copy s, copy es));
 				fail
 			}
@@ -301,8 +306,8 @@ mod tests {
 	}
 
 	fn test_std_time(s: ~str) {
-		alt ({ sec: 0_i64, nsec: 0_i32 } as date_time).from_str(s) {
-			ok(dt) {
+		match ({ sec: 0_i64, nsec: 0_i32 } as date_time).from_str(s) {
+			ok(dt) => {
 				let dtm = dt.tm();
 				let stm = std::time::at_utc(dt.timespec());
 				if stm != dtm {
@@ -316,7 +321,7 @@ mod tests {
 					fail
 				}
 			}
-			err(es) {
+			err(es) => {
 				log(error, (~"test_std_time", copy s, copy es));
 				fail
 			}
