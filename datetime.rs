@@ -1,3 +1,7 @@
+// NB: transitionary, de-mode-ing.
+//#[forbid(deprecated_mode)];
+#[forbid(deprecated_pattern)];
+
 use std;
 
 import std::time::tm;
@@ -237,8 +241,8 @@ impl date_time: date_str {
 
 	fn from_str(ds: ~str) -> result<date_time, ~str> {
 		match std::time::strptime(ds, ~"%Y-%m-%d %H:%M:%S") {
-			ok(tm) => { ok(({ sec: 0_i64, nsec: 0_i32 } as date_time).from_tm(tm)) }
-			err(es) => { err(copy es) }
+			ok(ref tm) => { ok(({ sec: 0_i64, nsec: 0_i32 } as date_time).from_tm(*tm)) }
+			err(ref es) => { err(copy *es) }
 		}
 	}
 }
@@ -255,8 +259,8 @@ mod tests {
 					fail
 				}
 			}
-			err(es) => {
-				log(error, (~"test_dt_str", copy s, copy es));
+			err(ref es) => {
+				log(error, (~"test_dt_str", copy s, copy *es));
 				fail
 			}
 		}
@@ -289,8 +293,8 @@ mod tests {
 					fail
 				}
 			}
-			err(es) => {
-				log(error, (~"test_std_time", copy s, copy es));
+			err(ref es) => {
+				log(error, (~"test_std_time", copy s, copy *es));
 				fail
 			}
 		}
