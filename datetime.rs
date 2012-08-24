@@ -12,26 +12,26 @@ trait date {
 	fn timespec() -> std::time::timespec;
 	fn from_timespec(ts: std::time::timespec) -> date;
 	fn tm() -> std::time::tm;
-	fn from_tm(tm: std::time::tm) -> date;
+	fn from_tm(tm: &std::time::tm) -> date;
 }
 
 trait time {
 	fn timespec() -> std::time::timespec;
 	fn from_timespec(ts: std::time::timespec) -> time;
 	fn tm() -> std::time::tm;
-	fn from_tm(tm: std::time::tm) -> time;
+	fn from_tm(tm: &std::time::tm) -> time;
 }
 
 trait date_time {
 	fn timespec() -> std::time::timespec;
 	fn from_timespec(ts: std::time::timespec) -> date_time;
 	fn tm() -> std::time::tm;
-	fn from_tm(tm: std::time::tm) -> date_time;
+	fn from_tm(tm: &std::time::tm) -> date_time;
 }
 
 trait date_str {
 	fn str() -> ~str;
-	fn from_str(ds: ~str) -> result<date_time, ~str>;
+	fn from_str(ds: &str) -> result<date_time, ~str>;
 }
 
 const SECS_FROM_UNIX_EPOCH: i64 = 62135596800;
@@ -125,7 +125,7 @@ impl i32: date {
 		})
 	}
 
-	fn from_tm(tm: std::time::tm) -> date {
+	fn from_tm(tm: &std::time::tm) -> date {
 		days_from_date(tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday) as date
 	}
 }
@@ -157,7 +157,7 @@ impl i64: time {
 		})
 	}
 
-	fn from_tm(tm: std::time::tm) -> time {
+	fn from_tm(tm: &std::time::tm) -> time {
 		(tm.tm_hour as i64*3600000000000 + tm.tm_min as i64*60000000000 + tm.tm_sec as i64*1000000000 + tm.tm_nsec as i64) as time
 	}
 }
@@ -191,7 +191,7 @@ impl i64: date_time {
 		})
 	}
 
-	fn from_tm(tm: std::time::tm) -> date_time {
+	fn from_tm(tm: &std::time::tm) -> date_time {
 		let d = days_from_date(tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday);
 		let s = tm.tm_hour as i64*3600 + tm.tm_min as i64*60 + tm.tm_sec as i64;
 		(d as i64*86400000 + s*1000 + (tm.tm_nsec as i64)/1000000) as date_time
@@ -226,7 +226,7 @@ impl std::time::timespec: date_time {
 		})
 	}
 
-	fn from_tm(tm: std::time::tm) -> date_time {
+	fn from_tm(tm: &std::time::tm) -> date_time {
 		let d = days_from_date(tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday) as i64;
 		let s = (tm.tm_hour as i64)*3600 + (tm.tm_min as i64)*60 + tm.tm_sec as i64;
 		{ sec: d*86400 - SECS_FROM_UNIX_EPOCH + s, nsec: tm.tm_nsec } as date_time
@@ -239,9 +239,9 @@ impl date_time: date_str {
 		#fmt("%s%s", tm.strftime(~"%Y-%m-%d %H:%M:%S"), if tm.tm_nsec != 0 { #fmt("%09i", tm.tm_nsec as int) } else { ~"" })
 	}
 
-	fn from_str(ds: ~str) -> result<date_time, ~str> {
-		match std::time::strptime(ds, ~"%Y-%m-%d %H:%M:%S") {
-			ok(ref tm) => { ok(({ sec: 0_i64, nsec: 0_i32 } as date_time).from_tm(*tm)) }
+	fn from_str(ds: &str) -> result<date_time, ~str> {
+		match std::time::strptime(str::from_slice(ds), ~"%Y-%m-%d %H:%M:%S") {
+			ok(ref tm) => { ok(({ sec: 0_i64, nsec: 0_i32 } as date_time).from_tm(tm)) }
 			err(ref es) => { err(copy *es) }
 		}
 	}
@@ -250,17 +250,17 @@ impl date_time: date_str {
 
 #[cfg(test)]
 mod tests {
-	fn test_dt_str(s: ~str) {
+	fn test_dt_str(s: &str) {
 		match ({ sec: 0_i64, nsec: 0_i32 } as date_time).from_str(s) {
 			ok(dt) => {
 				let dts = dt.str();
-				if s != dts {
-					log(error, (~"test_dt_str", copy s, dts));
+				if str::from_slice(s) != dts {
+					log(error, (~"test_dt_str", str::from_slice(s), dts));
 					fail
 				}
 			}
 			err(ref es) => {
-				log(error, (~"test_dt_str", copy s, copy *es));
+				log(error, (~"test_dt_str", str::from_slice(s), copy *es));
 				fail
 			}
 		}
@@ -268,33 +268,33 @@ mod tests {
 
 	#[test]
 	fn test_dt_limits() {
-		test_dt_str(~"2012-05-07 09:56:33");
-		test_dt_str(~"1000-01-01 00:00:00");
-		test_dt_str(~"9999-12-31 23:59:59");
-		test_dt_str(~"1900-02-28 23:59:59");
-		test_dt_str(~"1900-03-01 00:00:00");
-		test_dt_str(~"2000-02-29 23:59:59");
-		test_dt_str(~"2000-03-01 00:00:00");
+		test_dt_str("2012-05-07 09:56:33");
+		test_dt_str("1000-01-01 00:00:00");
+		test_dt_str("9999-12-31 23:59:59");
+		test_dt_str("1900-02-28 23:59:59");
+		test_dt_str("1900-03-01 00:00:00");
+		test_dt_str("2000-02-29 23:59:59");
+		test_dt_str("2000-03-01 00:00:00");
 	}
 
-	fn test_std_time(s: ~str) {
+	fn test_std_time(s: &str) {
 		match ({ sec: 0_i64, nsec: 0_i32 } as date_time).from_str(s) {
 			ok(dt) => {
 				let dtm = dt.tm();
 				let stm = std::time::at_utc(dt.timespec());
 				if stm != dtm {
-					log(error, (~"test_std_time", copy s, dtm, stm));
+					log(error, (~"test_std_time", str::from_slice(s), dtm, stm));
 					fail
 				}
 				let dts = dt.timespec();
 				let sts = dtm.to_timespec();
 				if dts != sts {
-					log(error, (~"test_std_time", copy s, dts, sts));
+					log(error, (~"test_std_time", str::from_slice(s), dts, sts));
 					fail
 				}
 			}
 			err(ref es) => {
-				log(error, (~"test_std_time", copy s, copy *es));
+				log(error, (~"test_std_time", str::from_slice(s), copy *es));
 				fail
 			}
 		}
@@ -302,31 +302,31 @@ mod tests {
 
 	#[test]
 	fn test_std_limits() {
-		test_std_time(~"2012-05-07 09:56:33");
-		test_std_time(~"1901-12-13 20:45:52");
-		test_std_time(~"9999-12-31 23:59:59");
-		test_std_time(~"2100-02-28 23:59:59");
-		test_std_time(~"2100-03-01 00:00:00");
-		test_std_time(~"2000-02-29 23:59:59");
-		test_std_time(~"2000-03-01 00:00:00");
+		test_std_time("2012-05-07 09:56:33");
+		test_std_time("1901-12-13 20:45:52");
+		test_std_time("9999-12-31 23:59:59");
+		test_std_time("2100-02-28 23:59:59");
+		test_std_time("2100-03-01 00:00:00");
+		test_std_time("2000-02-29 23:59:59");
+		test_std_time("2000-03-01 00:00:00");
 	}
 
 	#[test]
 	#[should_fail]
 	fn test_std_bad_low_limit() {
-		test_std_time(~"1901-12-13 20:45:51");
+		test_std_time("1901-12-13 20:45:51");
 	}
 
 	#[test]
 	#[should_fail]
 	fn test_bad_leap() {
-		test_dt_str(~"2100-02-29 23:59:59");
+		test_dt_str("2100-02-29 23:59:59");
 	}
 
 	#[test]
 	#[should_fail]
 	fn test_std_bad_hi_limit() {
-		test_std_time(~"10000-01-01 00:00:00");
+		test_std_time("10000-01-01 00:00:00");
 	}
 
 	fn test_funcs(in: i32) {
@@ -337,15 +337,15 @@ mod tests {
 		   dt.mday > month_length(dt.mon, leapyear(dt.year)) + 1 ||
 		   dt.yday < 0 ||
 		   dt.yday > 365 {
-			log(error, ("test_funcs", in, dt));
+			log(error, (~"test_funcs", in, dt));
 			fail
 		}
 		let d = days_from_date(dt.year, dt.mon, dt.mday);
 		if d != in {
-			log(error, ("test_funcs", in, dt, d));
+			log(error, (~"test_funcs", in, dt, d));
 			fail
 		}
-		log(debug, ("test_funcs", in, ((in as date).timespec() as date_time).str()));
+		log(debug, (~"test_funcs", in, ((in as date).timespec() as date_time).str()));
 	}
 
 	#[test]
