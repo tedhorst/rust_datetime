@@ -236,7 +236,7 @@ impl std::time::timespec: date_time {
 impl date_time: date_str {
 	fn str() -> ~str {
 		let tm = self.tm();
-		#fmt("%s%s", tm.strftime("%Y-%m-%d %H:%M:%S"), if tm.tm_nsec != 0 { #fmt("%09i", tm.tm_nsec as int) } else { ~"" })
+		fmt!("%s%s", tm.strftime("%Y-%m-%d %H:%M:%S"), if tm.tm_nsec != 0 { fmt!("%09i", tm.tm_nsec as int) } else { ~"" })
 	}
 
 	fn from_str(ds: &str) -> result<date_time, ~str> {
