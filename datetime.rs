@@ -236,11 +236,11 @@ impl std::time::timespec: date_time {
 impl date_time: date_str {
 	fn str() -> ~str {
 		let tm = self.tm();
-		#fmt("%s%s", tm.strftime(~"%Y-%m-%d %H:%M:%S"), if tm.tm_nsec != 0 { #fmt("%09i", tm.tm_nsec as int) } else { ~"" })
+		#fmt("%s%s", tm.strftime("%Y-%m-%d %H:%M:%S"), if tm.tm_nsec != 0 { #fmt("%09i", tm.tm_nsec as int) } else { ~"" })
 	}
 
 	fn from_str(ds: &str) -> result<date_time, ~str> {
-		match std::time::strptime(str::from_slice(ds), ~"%Y-%m-%d %H:%M:%S") {
+		match std::time::strptime(str::from_slice(ds), "%Y-%m-%d %H:%M:%S") {
 			ok(ref tm) => { ok(({ sec: 0_i64, nsec: 0_i32 } as date_time).from_tm(tm)) }
 			err(ref es) => { err(copy *es) }
 		}
