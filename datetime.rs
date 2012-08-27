@@ -10,16 +10,16 @@ import result::{result, ok, err};
 
 trait date {
 	pure fn timespec() -> std::time::timespec;
-	pure fn from_timespec(ts: std::time::timespec) -> date;
+	static pure fn date_from_timespec(ts: std::time::timespec) -> self;
 	pure fn tm() -> std::time::tm;
-	pure fn from_tm(tm: &std::time::tm) -> date;
+	static pure fn date_from_tm(tm: &std::time::tm) -> self;
 }
 
 trait time {
 	pure fn timespec() -> std::time::timespec;
-	pure fn from_timespec(ts: std::time::timespec) -> time;
+	static pure fn time_from_timespec(ts: std::time::timespec) -> self;
 	pure fn tm() -> std::time::tm;
-	pure fn from_tm(tm: &std::time::tm) -> time;
+	static pure fn time_from_tm(tm: &std::time::tm) -> self;
 }
 
 trait date_time {
@@ -104,8 +104,8 @@ impl i32: date {
 		{ sec: self as i64*86400 - SECS_FROM_UNIX_EPOCH, nsec: 0 }
 	}
 
-	pure fn from_timespec(ts: std::time::timespec) -> date {
-		(((ts.sec + SECS_FROM_UNIX_EPOCH)/86400) as i32) as date
+	static pure fn date_from_timespec(ts: std::time::timespec) -> i32 {
+		((ts.sec + SECS_FROM_UNIX_EPOCH)/86400) as i32
 	}
 
 	pure fn tm() -> std::time::tm {
@@ -125,8 +125,8 @@ impl i32: date {
 		})
 	}
 
-	pure fn from_tm(tm: &std::time::tm) -> date {
-		days_from_date(tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday) as date
+	static pure fn date_from_tm(tm: &std::time::tm) -> i32 {
+		days_from_date(tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday)
 	}
 }
 
@@ -136,8 +136,8 @@ impl i64: time {
 		{ sec: (self % 86400000000000)/1000000000, nsec: (self % 1000000000) as i32 }
 	}
 
-	pure fn from_timespec(ts: std::time::timespec) -> time {
-		((ts.sec % 86400)*1000000000 + ts.nsec as i64) as time
+	static pure fn time_from_timespec(ts: std::time::timespec) -> i64 {
+		(ts.sec % 86400)*1000000000 + ts.nsec as i64
 	}
 
 	pure fn tm() -> std::time::tm {
@@ -157,8 +157,8 @@ impl i64: time {
 		})
 	}
 
-	pure fn from_tm(tm: &std::time::tm) -> time {
-		(tm.tm_hour as i64*3600000000000 + tm.tm_min as i64*60000000000 + tm.tm_sec as i64*1000000000 + tm.tm_nsec as i64) as time
+	static pure fn time_from_tm(tm: &std::time::tm) -> i64 {
+		tm.tm_hour as i64*3600000000000 + tm.tm_min as i64*60000000000 + tm.tm_sec as i64*1000000000 + tm.tm_nsec as i64
 	}
 }
 
@@ -250,6 +250,54 @@ impl date_time: date_str {
 
 #[cfg(test)]
 mod tests {
+	fn test_time(i: i64) {
+		let tm = (i as time).tm();
+		let i2 = time_from_tm(&tm);
+		if i2 != i {
+			log(error, (~"test_time failed for:", i, i2, tm));
+			fail
+		}
+		let ts = (i as time).timespec();
+		let i2 = time_from_timespec(ts);
+		if i2 != i {
+			log(error, (~"test_time failed for:", i, i2, ts));
+			fail
+		}
+	}
+
+	#[test]
+	fn test_some_times() {
+		test_time(0);
+		test_time(1);
+		test_time(-1);
+		test_time(86399999999998);
+		test_time(86399999999999);
+		test_time(-86399999999999);
+	}
+
+	fn test_date(i: i32) {
+		let tm = (i as date).tm();
+		let i2 = date_from_tm(&tm);
+		if i2 != i {
+			log(error, (~"test_date failed for:", i, i2, tm));
+			fail
+		}
+		let ts = (i as date).timespec();
+		let i2 = date_from_timespec(ts);
+		if i2 != i {
+			log(error, (~"test_date failed for:", i, i2, ts));
+			fail
+		}
+	}
+
+	#[test]
+	fn test_some_dates() {
+		test_date(0);
+		test_date(1);
+		test_date(2147483646);
+		test_date(2147483647);
+	}
+
 	fn test_dt_str(s: &str) {
 		match ({ sec: 0_i64, nsec: 0_i32 } as date_time).from_str(s) {
 			ok(dt) => {
