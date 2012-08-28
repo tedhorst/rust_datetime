@@ -6,7 +6,7 @@ use std;
 
 import std::time::tm;
 import std::time::tm_;
-import result::{result, ok, err};
+import result::{Result, Ok, Err};
 
 trait date {
 	pure fn timespec() -> std::time::timespec;
@@ -31,7 +31,7 @@ trait date_time {
 
 trait date_str {
 	fn str() -> ~str;
-	fn from_str(ds: &str) -> result<date_time, ~str>;
+	fn from_str(ds: &str) -> Result<date_time, ~str>;
 }
 
 const SECS_FROM_UNIX_EPOCH: i64 = 62135596800;
@@ -239,10 +239,10 @@ impl date_time: date_str {
 		fmt!("%s%s", tm.strftime("%Y-%m-%d %H:%M:%S"), if tm.tm_nsec != 0 { fmt!("%09i", tm.tm_nsec as int) } else { ~"" })
 	}
 
-	fn from_str(ds: &str) -> result<date_time, ~str> {
+	fn from_str(ds: &str) -> Result<date_time, ~str> {
 		match std::time::strptime(str::from_slice(ds), "%Y-%m-%d %H:%M:%S") {
-			ok(ref tm) => { ok(({ sec: 0_i64, nsec: 0_i32 } as date_time).from_tm(tm)) }
-			err(ref es) => { err(copy *es) }
+			Ok(ref tm) => { Ok(({ sec: 0_i64, nsec: 0_i32 } as date_time).from_tm(tm)) }
+			Err(ref es) => { Err(copy *es) }
 		}
 	}
 }
@@ -300,14 +300,14 @@ mod tests {
 
 	fn test_dt_str(s: &str) {
 		match ({ sec: 0_i64, nsec: 0_i32 } as date_time).from_str(s) {
-			ok(dt) => {
+			Ok(dt) => {
 				let dts = dt.str();
 				if str::from_slice(s) != dts {
 					log(error, (~"test_dt_str", str::from_slice(s), dts));
 					fail
 				}
 			}
-			err(ref es) => {
+			Err(ref es) => {
 				log(error, (~"test_dt_str", str::from_slice(s), copy *es));
 				fail
 			}
@@ -327,7 +327,7 @@ mod tests {
 
 	fn test_std_time(s: &str) {
 		match ({ sec: 0_i64, nsec: 0_i32 } as date_time).from_str(s) {
-			ok(dt) => {
+			Ok(dt) => {
 				let dtm = dt.tm();
 				let stm = std::time::at_utc(dt.timespec());
 				if stm != dtm {
@@ -341,7 +341,7 @@ mod tests {
 					fail
 				}
 			}
-			err(ref es) => {
+			Err(ref es) => {
 				log(error, (~"test_std_time", str::from_slice(s), copy *es));
 				fail
 			}
