@@ -240,7 +240,7 @@ impl date_time: date_str {
 	}
 
 	fn from_str(ds: &str) -> Result<date_time, ~str> {
-		match std::time::strptime(str::from_slice(ds), "%Y-%m-%d %H:%M:%S") {
+		match std::time::strptime(ds, "%Y-%m-%d %H:%M:%S") {
 			Ok(ref tm) => { Ok(({ sec: 0_i64, nsec: 0_i32 } as date_time).from_tm(tm)) }
 			Err(ref es) => { Err(copy *es) }
 		}
