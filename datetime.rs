@@ -398,17 +398,19 @@ mod tests {
 
 	#[test]
 	fn test_all_funcs() {
+		let mplier = if os::getenv("RUST_BENCH").is_some() { 10 } else { 1 };
 		let mut i = 0;
-		while i < 3652060 {
-			test_funcs(i);
+		while i < 3652060*mplier {
+			test_funcs(i/mplier);
 			i += 1;
 		}
 	}
 
 	#[test]
 	fn test_ml_perf() {
+		let mplier = if os::getenv("RUST_BENCH").is_some() { 100 } else { 1 };
 		let mut i = 0;
-		while i < 1000000000 {
+		while i < 10000000*mplier {
 			let _ = month_lookup(i % 366, true);
 			i += 1;
 		}
