@@ -8,18 +8,22 @@ import std::time::Tm;
 import std::time::Tm_;
 import result::{Result, Ok, Err};
 
-trait Date {
-	pure fn timespec() -> std::time::Timespec;
-	static pure fn date_from_timespec(ts: std::time::Timespec) -> self;
-	pure fn tm() -> std::time::Tm;
-	static pure fn date_from_tm(tm: &std::time::Tm) -> self;
+mod date {
+	trait Date {
+		pure fn timespec() -> std::time::Timespec;
+		static pure fn from_timespec(ts: std::time::Timespec) -> self;
+		pure fn tm() -> std::time::Tm;
+		static pure fn from_tm(tm: &std::time::Tm) -> self;
+	}
 }
 
-trait Time {
-	pure fn timespec() -> std::time::Timespec;
-	static pure fn time_from_timespec(ts: std::time::Timespec) -> self;
-	pure fn tm() -> std::time::Tm;
-	static pure fn time_from_tm(tm: &std::time::Tm) -> self;
+mod time {
+	trait Time {
+		pure fn timespec() -> std::time::Timespec;
+		static pure fn from_timespec(ts: std::time::Timespec) -> self;
+		pure fn tm() -> std::time::Tm;
+		static pure fn from_tm(tm: &std::time::Tm) -> self;
+	}
 }
 
 trait DateTime {
@@ -104,13 +108,13 @@ pure fn days_from_date(y: i32, m: i32, d: i32) -> i32 {
 	365*ym1 + ym1/4 - ym1/100 + ym1/400 + accume_days(m, ly) + d - 1
 }
 
-impl i32: Date {
+impl i32: date::Date {
 	//  days since 0001-01-01
 	pure fn timespec() -> std::time::Timespec {
 		{ sec: self as i64*86400 - SECS_FROM_UNIX_EPOCH, nsec: 0 }
 	}
 
-	static pure fn date_from_timespec(ts: std::time::Timespec) -> i32 {
+	static pure fn from_timespec(ts: std::time::Timespec) -> i32 {
 		((ts.sec + SECS_FROM_UNIX_EPOCH)/86400) as i32
 	}
 
@@ -131,18 +135,18 @@ impl i32: Date {
 		})
 	}
 
-	static pure fn date_from_tm(tm: &std::time::Tm) -> i32 {
+	static pure fn from_tm(tm: &std::time::Tm) -> i32 {
 		days_from_date(tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday)
 	}
 }
 
-impl i64: Time {
+impl i64: time::Time {
 	//  nanosecond resolution
 	pure fn timespec() -> std::time::Timespec {
 		{ sec: (self % 86400000000000)/1000000000, nsec: (self % 1000000000) as i32 }
 	}
 
-	static pure fn time_from_timespec(ts: std::time::Timespec) -> i64 {
+	static pure fn from_timespec(ts: std::time::Timespec) -> i64 {
 		(ts.sec % 86400)*1000000000 + ts.nsec as i64
 	}
 
@@ -163,7 +167,7 @@ impl i64: Time {
 		})
 	}
 
-	static pure fn time_from_tm(tm: &std::time::Tm) -> i64 {
+	static pure fn from_tm(tm: &std::time::Tm) -> i64 {
 		tm.tm_hour as i64*3600000000000 + tm.tm_min as i64*60000000000 + tm.tm_sec as i64*1000000000 + tm.tm_nsec as i64
 	}
 }
@@ -257,14 +261,14 @@ impl DateTime: DateStr {
 #[cfg(test)]
 mod tests {
 	fn test_time(i: i64) {
-		let tm = (i as Time).tm();
-		let i2 = time_from_tm(&tm);
+		let tm = (i as time::Time).tm();
+		let i2 = time::from_tm(&tm);
 		if i2 != i {
 			log(error, (~"test_time failed for:", i, i2, tm));
 			fail
 		}
-		let ts = (i as Time).timespec();
-		let i2 = time_from_timespec(ts);
+		let ts = (i as time::Time).timespec();
+		let i2 = time::from_timespec(ts);
 		if i2 != i {
 			log(error, (~"test_time failed for:", i, i2, ts));
 			fail
@@ -282,14 +286,14 @@ mod tests {
 	}
 
 	fn test_date(i: i32) {
-		let tm = (i as Date).tm();
-		let i2 = date_from_tm(&tm);
+		let tm = (i as date::Date).tm();
+		let i2 = date::from_tm(&tm);
 		if i2 != i {
 			log(error, (~"test_date failed for:", i, i2, tm));
 			fail
 		}
-		let ts = (i as Date).timespec();
-		let i2 = date_from_timespec(ts);
+		let ts = (i as date::Date).timespec();
+		let i2 = date::from_timespec(ts);
 		if i2 != i {
 			log(error, (~"test_date failed for:", i, i2, ts));
 			fail
@@ -399,7 +403,7 @@ mod tests {
 			log(error, (~"test_funcs", in, dt, d));
 			fail
 		}
-		log(debug, (~"test_funcs", in, ((in as Date).timespec() as DateTime).str()));
+		log(debug, (~"test_funcs", in, ((in as date::Date).timespec() as DateTime).str()));
 	}
 
 	#[test]
