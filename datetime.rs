@@ -36,6 +36,7 @@ trait DateStr {
 
 const SECS_FROM_UNIX_EPOCH: i64 = 62135596800;
 
+#[inline(always)]
 pure fn leapyear(y: i32) -> bool { y % 4 == 0 && (y % 100 != 0 || y % 400 == 0) }
 
 const month_lookup_vec: [i32]/365 = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
@@ -51,6 +52,7 @@ const month_lookup_vec: [i32]/365 = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
                                      11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11,
                                      12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12];
 
+#[inline(always)]
 pure fn month_lookup(doy: i32, ly: bool) -> i32 {
 	let xtra = (ly && doy > 58) as i32;
 	month_lookup_vec[doy - xtra]
@@ -58,6 +60,7 @@ pure fn month_lookup(doy: i32, ly: bool) -> i32 {
 
 const accume_days_vec: [i32]/13 = [0, 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
 
+#[inline(always)]
 pure fn accume_days(m: i32, ly: bool) -> i32 {
 	let xtra = (ly && m > 2) as i32;
 	accume_days_vec[m] + xtra
@@ -65,11 +68,13 @@ pure fn accume_days(m: i32, ly: bool) -> i32 {
 
 const month_length_vec: [i32]/13 = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 
+#[inline(always)]
 pure fn month_length(m: i32, ly: bool) -> i32 {
 	let xtra = (ly && m == 2) as i32;
 	month_length_vec[m] + xtra
 }
 
+#[inline(always)]
 pure fn date_from_days(days: i32) -> { year: i32, mon: i32, mday: i32, yday: i32} {
 	let n400 = days/146097;
 	let d1 = days % 146097;
@@ -92,6 +97,7 @@ pure fn date_from_days(days: i32) -> { year: i32, mon: i32, mday: i32, yday: i32
 	{ year: y, mon: m, mday: d, yday: doy}
 }
 
+#[inline(always)]
 pure fn days_from_date(y: i32, m: i32, d: i32) -> i32 {
 	let ly = leapyear(y);
 	let ym1 = y - 1;
