@@ -4,9 +4,9 @@
 
 use std;
 
-import std::time::Tm;
-import std::time::Tm_;
-import result::{Result, Ok, Err};
+use std::time::Tm;
+use std::time::Tm_;
+use result::{Result, Ok, Err};
 
 mod date {
 	trait Date {
