@@ -2,7 +2,7 @@
 //#[forbid(deprecated_mode)];
 #[forbid(deprecated_pattern)];
 
-use std;
+extern mod std;
 
 use std::time::Tm;
 use std::time::Tm_;
