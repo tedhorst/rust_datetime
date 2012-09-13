@@ -35,7 +35,7 @@ trait DateTime {
 
 trait DateStr {
 	fn str() -> ~str;
-	fn from_str(ds: &str) -> Result<DateTime, ~str>;
+	fn from_str(ds: &str) -> Result<self, ~str>;
 }
 
 const SECS_FROM_UNIX_EPOCH: i64 = 62135596800;
@@ -243,6 +243,40 @@ impl std::time::Timespec: DateTime {
 	}
 }
 
+impl time::Time: DateStr {
+	fn str() -> ~str {
+		let tm = self.tm();
+		fmt!("%s%s", tm.strftime("%H:%M:%S"), if tm.tm_nsec != 0 { fmt!("%09i", tm.tm_nsec as int) } else { ~"" })
+	}
+
+	fn from_str(ds: &str) -> Result<time::Time, ~str> {
+		match std::time::strptime(ds, "%H:%M:%S") {
+			Ok(ref tm) => {
+				let atime: i64 = time::from_tm(tm);
+				Ok(atime as time::Time)
+			}
+			Err(ref es) => { Err(copy *es) }
+		}
+	}
+}
+
+impl date::Date: DateStr {
+	fn str() -> ~str {
+		let tm = self.tm();
+		tm.strftime("%Y-%m-%d")
+	}
+
+	fn from_str(ds: &str) -> Result<date::Date, ~str> {
+		match std::time::strptime(ds, "%Y-%m-%d") {
+			Ok(ref tm) => {
+				let adate: i32 = date::from_tm(tm);
+				Ok(adate as date::Date)
+			}
+			Err(ref es) => { Err(copy *es) }
+		}
+	}
+}
+
 impl DateTime: DateStr {
 	fn str() -> ~str {
 		let tm = self.tm();
@@ -261,7 +295,9 @@ impl DateTime: DateStr {
 #[cfg(test)]
 mod tests {
 	fn test_time(i: i64) {
-		let tm = (i as time::Time).tm();
+		let atime = i as time::Time;
+		log(error, (i, atime.str()));
+		let tm = (atime).tm();
 		let i2 = time::from_tm(&tm);
 		if i2 != i {
 			log(error, (~"test_time failed for:", i, i2, tm));
@@ -286,7 +322,9 @@ mod tests {
 	}
 
 	fn test_date(i: i32) {
-		let tm = (i as date::Date).tm();
+		let adate = i as date::Date;
+		log(error, (i, adate.str()));
+		let tm = (adate).tm();
 		let i2 = date::from_tm(&tm);
 		if i2 != i {
 			log(error, (~"test_date failed for:", i, i2, tm));
