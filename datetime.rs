@@ -298,13 +298,13 @@ mod tests {
 		let atime = i as time::Time;
 		log(error, (i, atime.str()));
 		let tm = (atime).tm();
-		let i2 = time::from_tm(&tm);
+		let i2: i64 = time::from_tm(&tm);
 		if i2 != i {
 			log(error, (~"test_time failed for:", i, i2, tm));
 			fail
 		}
 		let ts = (i as time::Time).timespec();
-		let i2 = time::from_timespec(ts);
+		let i2: i64 = time::from_timespec(ts);
 		if i2 != i {
 			log(error, (~"test_time failed for:", i, i2, ts));
 			fail
@@ -325,13 +325,13 @@ mod tests {
 		let adate = i as date::Date;
 		log(error, (i, adate.str()));
 		let tm = (adate).tm();
-		let i2 = date::from_tm(&tm);
+		let i2: i32 = date::from_tm(&tm);
 		if i2 != i {
 			log(error, (~"test_date failed for:", i, i2, tm));
 			fail
 		}
 		let ts = (i as date::Date).timespec();
-		let i2 = date::from_timespec(ts);
+		let i2: i32 = date::from_timespec(ts);
 		if i2 != i {
 			log(error, (~"test_date failed for:", i, i2, ts));
 			fail
