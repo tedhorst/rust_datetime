@@ -9,7 +9,7 @@ use std::time::Tm_;
 use result::{Result, Ok, Err};
 
 mod date {
-	trait Date {
+	pub trait Date {
 		pure fn timespec() -> std::time::Timespec;
 		static pure fn from_timespec(ts: std::time::Timespec) -> self;
 		pure fn tm() -> std::time::Tm;
@@ -18,7 +18,7 @@ mod date {
 }
 
 mod time {
-	trait Time {
+	pub trait Time {
 		pure fn timespec() -> std::time::Timespec;
 		static pure fn from_timespec(ts: std::time::Timespec) -> self;
 		pure fn tm() -> std::time::Tm;
