@@ -323,7 +323,7 @@ mod tests {
 
 	fn test_date(i: i32) {
 		let adate = i as date::Date;
-		log(error, (i, adate.str()));
+		log(error, fmt!("%? %s", i, adate.str()));
 		let tm = (adate).tm();
 		let i2: i32 = date::from_tm(&tm);
 		if i2 != i {
@@ -376,13 +376,13 @@ mod tests {
 	fn test_std_time(s: &str) {
 		match ({ sec: 0_i64, nsec: 0_i32 } as DateTime).from_str(s) {
 			Ok(dt) => {
+				let dts = dt.timespec();
 				let dtm = dt.tm();
-				let stm = std::time::at_utc(dt.timespec());
+				let stm = std::time::at_utc(dts);
 				if stm != dtm {
 					log(error, (~"test_std_time", str::from_slice(s), dtm, stm));
 					fail
 				}
-				let dts = dt.timespec();
 				let sts = dtm.to_timespec();
 				if dts != sts {
 					log(error, (~"test_std_time", str::from_slice(s), dts, sts));
@@ -391,6 +391,26 @@ mod tests {
 			}
 			Err(ref es) => {
 				log(error, (~"test_std_time", str::from_slice(s), copy *es));
+				fail
+			}
+		}
+		match (0_i64 as DateTime).from_str(s) {
+			Ok(dt) => {
+				let dts = dt.timespec();
+				let dtm = dt.tm();
+				let stm = std::time::at_utc(dts);
+				if stm != dtm {
+					log(error, (~"test_std_time i64", str::from_slice(s), dtm, stm));
+					fail
+				}
+				let sts = dtm.to_timespec();
+				if dts != sts {
+					log(error, (~"test_std_time i64", str::from_slice(s), dts, sts));
+					fail
+				}
+			}
+			Err(ref es) => {
+				log(error, (~"test_std_time i64", str::from_slice(s), copy *es));
 				fail
 			}
 		}
@@ -460,6 +480,7 @@ mod tests {
 		let mut i = 0;
 		while i < 10000000*mplier {
 			let _ = month_lookup(i % 366, true);
+			let _ = month_lookup(i % 365, false);
 			i += 1;
 		}
 	}
