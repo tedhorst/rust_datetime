@@ -300,7 +300,7 @@ mod tests {
 		let tm = (atime).tm();
 		let i2: i64 = time::from_tm(&tm);
 		if i2 != i {
-			log(error, (~"test_time failed for:", i, i2, tm));
+			log(error, (~"test_time failed for:", i, i2, move tm));
 			fail
 		}
 		let ts = (i as time::Time).timespec();
@@ -327,7 +327,7 @@ mod tests {
 		let tm = (adate).tm();
 		let i2: i32 = date::from_tm(&tm);
 		if i2 != i {
-			log(error, (~"test_date failed for:", i, i2, tm));
+			log(error, (~"test_date failed for:", i, i2, move tm));
 			fail
 		}
 		let ts = (i as date::Date).timespec();
@@ -351,7 +351,7 @@ mod tests {
 			Ok(dt) => {
 				let dts = dt.str();
 				if str::from_slice(s) != dts {
-					log(error, (~"test_dt_str", str::from_slice(s), dts));
+					log(error, (~"test_dt_str", str::from_slice(s), move dts));
 					fail
 				}
 			}
@@ -380,7 +380,7 @@ mod tests {
 				let dtm = dt.tm();
 				let stm = std::time::at_utc(dts);
 				if stm != dtm {
-					log(error, (~"test_std_time", str::from_slice(s), dtm, stm));
+					log(error, (~"test_std_time", str::from_slice(s), move dtm, move stm));
 					fail
 				}
 				let sts = dtm.to_timespec();
@@ -400,7 +400,7 @@ mod tests {
 				let dtm = dt.tm();
 				let stm = std::time::at_utc(dts);
 				if stm != dtm {
-					log(error, (~"test_std_time i64", str::from_slice(s), dtm, stm));
+					log(error, (~"test_std_time i64", str::from_slice(s), move dtm, move stm));
 					fail
 				}
 				let sts = dtm.to_timespec();
