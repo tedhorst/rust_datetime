@@ -43,7 +43,7 @@ const SECS_FROM_UNIX_EPOCH: i64 = 62135596800;
 #[inline(always)]
 pure fn leapyear(y: i32) -> bool { y % 4 == 0 && (y % 100 != 0 || y % 400 == 0) }
 
-const month_lookup_vec: [i32]/365 = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+const month_lookup_vec: [i32 * 365] = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
                                      2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
                                      3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
                                      4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4,
@@ -62,7 +62,7 @@ pure fn month_lookup(doy: i32, ly: bool) -> i32 {
 	month_lookup_vec[doy - xtra]
 }
 
-const accume_days_vec: [i32]/13 = [0, 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
+const accume_days_vec: [i32 * 13] = [0, 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
 
 #[inline(always)]
 pure fn accume_days(m: i32, ly: bool) -> i32 {
@@ -70,7 +70,7 @@ pure fn accume_days(m: i32, ly: bool) -> i32 {
 	accume_days_vec[m] + xtra
 }
 
-const month_length_vec: [i32]/13 = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+const month_length_vec: [i32 * 13] = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 
 #[inline(always)]
 pure fn month_length(m: i32, ly: bool) -> i32 {
