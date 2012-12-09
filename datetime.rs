@@ -9,26 +9,26 @@ use result::{Result, Ok, Err};
 
 mod date {
 	pub trait Date {
-		pure fn timespec() -> Timespec;
+		pure fn timespec(&self) -> Timespec;
 		static pure fn from_timespec(ts: Timespec) -> self;
-		pure fn tm() -> Tm;
+		pure fn tm(&self) -> Tm;
 		static pure fn from_tm(tm: &Tm) -> self;
 	}
 }
 
 mod time {
 	pub trait Time {
-		pure fn timespec() -> Timespec;
+		pure fn timespec(&self) -> Timespec;
 		static pure fn from_timespec(ts: Timespec) -> self;
-		pure fn tm() -> Tm;
+		pure fn tm(&self) -> Tm;
 		static pure fn from_tm(tm: &Tm) -> self;
 	}
 }
 
 trait DateTime {
-	pure fn timespec() -> Timespec;
+	pure fn timespec(&self) -> Timespec;
 	pure fn from_timespec(ts: Timespec) -> DateTime;
-	pure fn tm() -> Tm;
+	pure fn tm(&self) -> Tm;
 	pure fn from_tm(tm: &Tm) -> DateTime;
 }
 
@@ -109,23 +109,23 @@ pure fn days_from_date(y: i32, m: i32, d: i32) -> i32 {
 
 impl i32: date::Date {
 	//  days since 0001-01-01
-	pure fn timespec() -> Timespec {
-		Timespec { sec: self as i64*86400 - SECS_FROM_UNIX_EPOCH, nsec: 0 }
+	pure fn timespec(&self) -> Timespec {
+		Timespec { sec: *self as i64*86400 - SECS_FROM_UNIX_EPOCH, nsec: 0 }
 	}
 
 	static pure fn from_timespec(ts: Timespec) -> i32 {
 		((ts.sec + SECS_FROM_UNIX_EPOCH)/86400) as i32
 	}
 
-	pure fn tm() -> Tm {
-		let dp = date_from_days(self);
+	pure fn tm(&self) -> Tm {
+		let dp = date_from_days(*self);
 		Tm { tm_sec: 0,
 		  tm_min: 0,
 		  tm_hour: 0,
 		  tm_mday: dp.mday,
 		  tm_mon: dp.mon - 1,
 		  tm_year: dp.year - 1900,
-		  tm_wday: (self + 1) % 7,
+		  tm_wday: (*self + 1) % 7,
 		  tm_yday: dp.yday,
 		  tm_isdst: 0,
 		  tm_gmtoff: 0,
@@ -141,16 +141,16 @@ impl i32: date::Date {
 
 impl i64: time::Time {
 	//  nanosecond resolution
-	pure fn timespec() -> Timespec {
-		Timespec { sec: (self % 86400000000000)/1000000000, nsec: (self % 1000000000) as i32 }
+	pure fn timespec(&self) -> Timespec {
+		Timespec { sec: (*self % 86400000000000)/1000000000, nsec: (*self % 1000000000) as i32 }
 	}
 
 	static pure fn from_timespec(ts: Timespec) -> i64 {
 		(ts.sec % 86400)*1000000000 + ts.nsec as i64
 	}
 
-	pure fn tm() -> Tm {
-		let s = (self % 86400000000000)/1000000000;
+	pure fn tm(&self) -> Tm {
+		let s = (*self % 86400000000000)/1000000000;
 		Tm { tm_sec: (s % 60) as i32,
 		  tm_min: ((s/60) % 60) as i32,
 		  tm_hour: (s/3600) as i32,
@@ -162,7 +162,7 @@ impl i64: time::Time {
 		  tm_isdst: 0,
 		  tm_gmtoff: 0,
 		  tm_zone: ~"UTC",
-		  tm_nsec: (self % 1000000000) as i32
+		  tm_nsec: (*self % 1000000000) as i32
 		}
 	}
 
@@ -173,30 +173,30 @@ impl i64: time::Time {
 
 impl i64: DateTime {
 	//  milliseconds since 0001-01-01
-	pure fn timespec() -> Timespec {
-		Timespec { sec: self/1000 - SECS_FROM_UNIX_EPOCH, nsec: ((self % 1000)*1000000) as i32 }
+	pure fn timespec(&self) -> Timespec {
+		Timespec { sec: *self/1000 - SECS_FROM_UNIX_EPOCH, nsec: ((*self % 1000)*1000000) as i32 }
 	}
 
 	pure fn from_timespec(ts: Timespec) -> DateTime {
 		((ts.sec + SECS_FROM_UNIX_EPOCH)*1000 + (ts.nsec as i64)/1000000) as DateTime
 	}
 
-	pure fn tm() -> Tm {
-		let d = self/86400000;
+	pure fn tm(&self) -> Tm {
+		let d = *self/86400000;
 		let dp = date_from_days(d as i32);
-		let s = (self % 86400000)/1000;
+		let s = (*self % 86400000)/1000;
 		Tm { tm_sec: (s % 60) as i32,
 		  tm_min: ((s/60) % 60) as i32,
 		  tm_hour: (s/3600) as i32,
 		  tm_mday: dp.mday,
 		  tm_mon: dp.mon - 1,
 		  tm_year: dp.year - 1900,
-		  tm_wday: ((self + 1) % 7) as i32,
+		  tm_wday: ((*self + 1) % 7) as i32,
 		  tm_yday: dp.yday,
 		  tm_isdst: 0,
 		  tm_gmtoff: 0,
 		  tm_zone: ~"UTC",
-		  tm_nsec: 1000000*(self % 1000) as i32
+		  tm_nsec: 1000000*(*self % 1000) as i32
 		}
 	}
 
@@ -208,18 +208,18 @@ impl i64: DateTime {
 }
 
 impl Timespec: DateTime {
-	pure fn timespec() -> Timespec {
-		self
+	pure fn timespec(&self) -> Timespec {
+		*self
 	}
 
 	pure fn from_timespec(ts: Timespec) -> DateTime {
 		ts as DateTime
 	}
 
-	pure fn tm() -> Tm {
-		let d = (self.sec + SECS_FROM_UNIX_EPOCH)/86400;
+	pure fn tm(&self) -> Tm {
+		let d = ((*self).sec + SECS_FROM_UNIX_EPOCH)/86400;
 		let dp = date_from_days(d as i32);
-		let s = (self.sec + SECS_FROM_UNIX_EPOCH) % 86400;
+		let s = ((*self).sec + SECS_FROM_UNIX_EPOCH) % 86400;
 		Tm { tm_sec: (s % 60) as i32,
 		  tm_min: ((s/60) % 60) as i32,
 		  tm_hour: (s/3600) as i32,
@@ -231,7 +231,7 @@ impl Timespec: DateTime {
 		  tm_isdst: 0,
 		  tm_gmtoff: 0,
 		  tm_zone: ~"UTC",
-		  tm_nsec: self.nsec
+		  tm_nsec: (*self).nsec
 		}
 	}
 
@@ -303,7 +303,7 @@ mod tests {
 			fail
 		}
 		let ts = (i as time::Time).timespec();
-		let i2: i64 = time::from_timespec(ts);
+		let i2: i64 = time::Time::from_timespec(ts);
 		if i2 != i {
 			log(error, (~"test_time failed for:", i, i2, ts));
 			fail
@@ -330,7 +330,7 @@ mod tests {
 			fail
 		}
 		let ts = (i as date::Date).timespec();
-		let i2: i32 = date::from_timespec(ts);
+		let i2: i32 = date::Date::from_timespec(ts);
 		if i2 != i {
 			log(error, (~"test_date failed for:", i, i2, ts));
 			fail
