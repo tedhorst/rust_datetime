@@ -33,8 +33,8 @@ trait DateTime {
 }
 
 trait DateStr {
-	fn str(&self) -> ~str;
-	static fn from_str(ds: &str) -> Result<self, ~str>;
+	pure fn str(&self) -> ~str;
+	static pure fn from_str(ds: &str) -> Result<self, ~str>;
 }
 
 const SECS_FROM_UNIX_EPOCH: i64 = 62135596800;
@@ -243,12 +243,12 @@ impl Timespec: DateTime {
 }
 
 impl time::Time: DateStr {
-	fn str(&self) -> ~str {
+	pure fn str(&self) -> ~str {
 		let tm = self.tm();
 		fmt!("%s%s", tm.strftime("%H:%M:%S"), if tm.tm_nsec != 0 { fmt!("%09i", tm.tm_nsec as int) } else { ~"" })
 	}
 
-	static fn from_str(ds: &str) -> Result<time::Time, ~str> {
+	static pure fn from_str(ds: &str) -> Result<time::Time, ~str> {
 		match strptime(ds, "%H:%M:%S") {
 			Ok(ref tm) => {
 				let atime: i64 = time::Time::from_tm(tm);
@@ -260,12 +260,12 @@ impl time::Time: DateStr {
 }
 
 impl date::Date: DateStr {
-	fn str(&self) -> ~str {
+	pure fn str(&self) -> ~str {
 		let tm = self.tm();
 		tm.strftime("%Y-%m-%d")
 	}
 
-	static fn from_str(ds: &str) -> Result<date::Date, ~str> {
+	static pure fn from_str(ds: &str) -> Result<date::Date, ~str> {
 		match strptime(ds, "%Y-%m-%d") {
 			Ok(ref tm) => {
 				let adate: i32 = date::Date::from_tm(tm);
@@ -277,12 +277,12 @@ impl date::Date: DateStr {
 }
 
 impl Timespec: DateStr {
-	fn str(&self) -> ~str {
+	pure fn str(&self) -> ~str {
 		let tm = self.tm();
 		fmt!("%s%s", tm.strftime("%Y-%m-%d %H:%M:%S"), if tm.tm_nsec != 0 { fmt!("%09i", tm.tm_nsec as int) } else { ~"" })
 	}
 
-	static fn from_str(ds: &str) -> Result<Timespec, ~str> {
+	static pure fn from_str(ds: &str) -> Result<Timespec, ~str> {
 		match strptime(ds, "%Y-%m-%d %H:%M:%S") {
 			Ok(ref tm) => {
 				let ndt: Timespec = DateTime::from_tm(tm);
@@ -294,12 +294,12 @@ impl Timespec: DateStr {
 }
 
 impl i64: DateStr {
-	fn str(&self) -> ~str {
+	pure fn str(&self) -> ~str {
 		let tm = self.tm();
 		fmt!("%s%s", tm.strftime("%Y-%m-%d %H:%M:%S"), if tm.tm_nsec != 0 { fmt!("%09i", tm.tm_nsec as int) } else { ~"" })
 	}
 
-	static fn from_str(ds: &str) -> Result<i64, ~str> {
+	static pure fn from_str(ds: &str) -> Result<i64, ~str> {
 		match strptime(ds, "%Y-%m-%d %H:%M:%S") {
 			Ok(ref tm) => {
 				let ndt: i64 = DateTime::from_tm(tm);
