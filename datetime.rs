@@ -316,7 +316,7 @@ mod tests {
 		let atime = i as time::Time;
 		log(error, (i, atime.str()));
 		let tm = (atime).tm();
-		let i2: i64 = time::from_tm(&tm);
+		let i2: i64 = time::Time::from_tm(&tm);
 		if i2 != i {
 			log(error, (~"test_time failed for:", i, i2, move tm));
 			fail
@@ -343,7 +343,7 @@ mod tests {
 		let adate = i as date::Date;
 		log(error, fmt!("%? %s", i, adate.str()));
 		let tm = (adate).tm();
-		let i2: i32 = date::from_tm(&tm);
+		let i2: i32 = date::Date::from_tm(&tm);
 		if i2 != i {
 			log(error, (~"test_date failed for:", i, i2, move tm));
 			fail
