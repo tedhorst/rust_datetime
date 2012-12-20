@@ -7,22 +7,18 @@ extern mod std;
 use std::time::{Tm, Timespec, strptime, at_utc};
 use result::{Result, Ok, Err};
 
-mod date {
-	pub trait Date {
-		pure fn timespec(&self) -> Timespec;
-		static pure fn from_timespec(ts: Timespec) -> self;
-		pure fn tm(&self) -> Tm;
-		static pure fn from_tm(tm: &Tm) -> self;
-	}
+pub trait Date {
+	pure fn timespec(&self) -> Timespec;
+	static pure fn from_timespec(ts: Timespec) -> self;
+	pure fn tm(&self) -> Tm;
+	static pure fn from_tm(tm: &Tm) -> self;
 }
 
-mod time {
-	pub trait Time {
-		pure fn timespec(&self) -> Timespec;
-		static pure fn from_timespec(ts: Timespec) -> self;
-		pure fn tm(&self) -> Tm;
-		static pure fn from_tm(tm: &Tm) -> self;
-	}
+pub trait Time {
+	pure fn timespec(&self) -> Timespec;
+	static pure fn from_timespec(ts: Timespec) -> self;
+	pure fn tm(&self) -> Tm;
+	static pure fn from_tm(tm: &Tm) -> self;
 }
 
 trait DateTime {
@@ -107,7 +103,7 @@ pure fn days_from_date(y: i32, m: i32, d: i32) -> i32 {
 	365*ym1 + ym1/4 - ym1/100 + ym1/400 + accume_days(m, ly) + d - 1
 }
 
-impl i32: date::Date {
+impl i32: Date {
 	//  days since 0001-01-01
 	pure fn timespec(&self) -> Timespec {
 		Timespec { sec: *self as i64*86400 - SECS_FROM_UNIX_EPOCH, nsec: 0 }
@@ -139,7 +135,7 @@ impl i32: date::Date {
 	}
 }
 
-impl i64: time::Time {
+impl i64: Time {
 	//  nanosecond resolution
 	pure fn timespec(&self) -> Timespec {
 		Timespec { sec: (*self % 86400000000000)/1000000000, nsec: (*self % 1000000000) as i32 }
@@ -242,68 +238,51 @@ impl Timespec: DateTime {
 	}
 }
 
-impl time::Time: DateStr {
+impl Time: DateStr {
 	pure fn str(&self) -> ~str {
 		let tm = self.tm();
 		fmt!("%s%s", tm.strftime("%H:%M:%S"), if tm.tm_nsec != 0 { fmt!("%09i", tm.tm_nsec as int) } else { ~"" })
 	}
 
-	static pure fn from_str(ds: &str) -> Result<time::Time, ~str> {
+	static pure fn from_str(ds: &str) -> Result<Time, ~str> {
 		match strptime(ds, "%H:%M:%S") {
 			Ok(ref tm) => {
-				let atime: i64 = time::Time::from_tm(tm);
-				Ok(atime as time::Time)
+				let atime: i64 = Time::from_tm(tm);
+				Ok(atime as Time)
 			}
 			Err(ref es) => { Err(copy *es) }
 		}
 	}
 }
 
-impl date::Date: DateStr {
+impl Date: DateStr {
 	pure fn str(&self) -> ~str {
 		let tm = self.tm();
 		tm.strftime("%Y-%m-%d")
 	}
 
-	static pure fn from_str(ds: &str) -> Result<date::Date, ~str> {
+	static pure fn from_str(ds: &str) -> Result<Date, ~str> {
 		match strptime(ds, "%Y-%m-%d") {
 			Ok(ref tm) => {
-				let adate: i32 = date::Date::from_tm(tm);
-				Ok(adate as date::Date)
+				let adate: i32 = Date::from_tm(tm);
+				Ok(adate as Date)
 			}
 			Err(ref es) => { Err(copy *es) }
 		}
 	}
 }
 
-impl Timespec: DateStr {
+impl DateTime: DateStr {
 	pure fn str(&self) -> ~str {
 		let tm = self.tm();
 		fmt!("%s%s", tm.strftime("%Y-%m-%d %H:%M:%S"), if tm.tm_nsec != 0 { fmt!("%09i", tm.tm_nsec as int) } else { ~"" })
 	}
 
-	static pure fn from_str(ds: &str) -> Result<Timespec, ~str> {
+	static pure fn from_str(ds: &str) -> Result<DateTime, ~str> {
 		match strptime(ds, "%Y-%m-%d %H:%M:%S") {
 			Ok(ref tm) => {
 				let ndt: Timespec = DateTime::from_tm(tm);
-				Ok(ndt)
-			}
-			Err(ref es) => { Err(copy *es) }
-		}
-	}
-}
-
-impl i64: DateStr {
-	pure fn str(&self) -> ~str {
-		let tm = self.tm();
-		fmt!("%s%s", tm.strftime("%Y-%m-%d %H:%M:%S"), if tm.tm_nsec != 0 { fmt!("%09i", tm.tm_nsec as int) } else { ~"" })
-	}
-
-	static pure fn from_str(ds: &str) -> Result<i64, ~str> {
-		match strptime(ds, "%Y-%m-%d %H:%M:%S") {
-			Ok(ref tm) => {
-				let ndt: i64 = DateTime::from_tm(tm);
-				Ok(ndt)
+				Ok(ndt as DateTime)
 			}
 			Err(ref es) => { Err(copy *es) }
 		}
@@ -313,16 +292,16 @@ impl i64: DateStr {
 #[cfg(test)]
 mod tests {
 	fn test_time(i: i64) {
-		let atime = i as time::Time;
+		let atime = i as Time;
 		log(error, (i, atime.str()));
 		let tm = (atime).tm();
-		let i2: i64 = time::Time::from_tm(&tm);
+		let i2: i64 = Time::from_tm(&tm);
 		if i2 != i {
 			log(error, (~"test_time failed for:", i, i2, move tm));
 			fail
 		}
-		let ts = (i as time::Time).timespec();
-		let i2: i64 = time::Time::from_timespec(ts);
+		let ts = (i as Time).timespec();
+		let i2: i64 = Time::from_timespec(ts);
 		if i2 != i {
 			log(error, (~"test_time failed for:", i, i2, ts));
 			fail
@@ -340,16 +319,16 @@ mod tests {
 	}
 
 	fn test_date(i: i32) {
-		let adate = i as date::Date;
+		let adate = i as Date;
 		log(error, fmt!("%? %s", i, adate.str()));
 		let tm = (adate).tm();
-		let i2: i32 = date::Date::from_tm(&tm);
+		let i2: i32 = Date::from_tm(&tm);
 		if i2 != i {
 			log(error, (~"test_date failed for:", i, i2, move tm));
 			fail
 		}
-		let ts = (i as date::Date).timespec();
-		let i2: i32 = date::Date::from_timespec(ts);
+		let ts = (i as Date).timespec();
+		let i2: i32 = Date::from_timespec(ts);
 		if i2 != i {
 			log(error, (~"test_date failed for:", i, i2, ts));
 			fail
@@ -365,7 +344,7 @@ mod tests {
 	}
 
 	fn test_dt_str(s: &str) {
-		let tsdr: Result<Timespec, ~str> = DateStr::from_str(s);
+		let tsdr: Result<DateTime, ~str> = DateStr::from_str(s);
 		match tsdr {
 			Ok(dt) => {
 				let dts = dt.str();
@@ -393,9 +372,10 @@ mod tests {
 	}
 
 	fn test_std_time(s: &str) {
-		let tsr: Result<Timespec, ~str> = DateStr::from_str(s);
+		let tsr: Result<DateTime, ~str> = DateStr::from_str(s);
 		match tsr {
-			Ok(dts) => {
+			Ok(gdt) => {
+				let dts = gdt.timespec();
 				let dtm = dts.tm();
 				let stm = at_utc(dts);
 				if stm != dtm {
@@ -413,7 +393,7 @@ mod tests {
 				fail
 			}
 		}
-		let ir: Result<i64, ~str> = DateStr::from_str(s);
+		let ir: Result<DateTime, ~str> = DateStr::from_str(s);
 		match ir {
 			Ok(dt) => {
 				let dts = dt.timespec();
@@ -487,7 +467,7 @@ mod tests {
 			log(error, (~"test_funcs", in, dt, d));
 			fail
 		}
-		log(debug, (~"test_funcs", in, (in as date::Date).timespec().str()));
+		log(debug, (~"test_funcs", in, ((in as Date).timespec() as DateTime).str()));
 	}
 
 	#[test]
