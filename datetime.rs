@@ -295,13 +295,13 @@ mod tests {
 		let atime = i as Time;
 		log(error, (i, atime.str()));
 		let tm = (atime).tm();
-		let i2: i64 = Time::from_tm(&tm);
+		let i2: i64 = ::Time::from_tm(&tm);
 		if i2 != i {
 			log(error, (~"test_time failed for:", i, i2, move tm));
 			fail
 		}
 		let ts = (i as Time).timespec();
-		let i2: i64 = Time::from_timespec(ts);
+		let i2: i64 = ::Time::from_timespec(ts);
 		if i2 != i {
 			log(error, (~"test_time failed for:", i, i2, ts));
 			fail
@@ -322,13 +322,13 @@ mod tests {
 		let adate = i as Date;
 		log(error, fmt!("%? %s", i, adate.str()));
 		let tm = (adate).tm();
-		let i2: i32 = Date::from_tm(&tm);
+		let i2: i32 = ::Date::from_tm(&tm);
 		if i2 != i {
 			log(error, (~"test_date failed for:", i, i2, move tm));
 			fail
 		}
 		let ts = (i as Date).timespec();
-		let i2: i32 = Date::from_timespec(ts);
+		let i2: i32 = ::Date::from_timespec(ts);
 		if i2 != i {
 			log(error, (~"test_date failed for:", i, i2, ts));
 			fail
@@ -344,7 +344,7 @@ mod tests {
 	}
 
 	fn test_dt_str(s: &str) {
-		let tsdr: Result<DateTime, ~str> = DateStr::from_str(s);
+		let tsdr: Result<DateTime, ~str> = ::DateStr::from_str(s);
 		match tsdr {
 			Ok(dt) => {
 				let dts = dt.str();
@@ -372,7 +372,7 @@ mod tests {
 	}
 
 	fn test_std_time(s: &str) {
-		let tsr: Result<DateTime, ~str> = DateStr::from_str(s);
+		let tsr: Result<DateTime, ~str> = ::DateStr::from_str(s);
 		match tsr {
 			Ok(gdt) => {
 				let dts = gdt.timespec();
@@ -393,7 +393,7 @@ mod tests {
 				fail
 			}
 		}
-		let ir: Result<DateTime, ~str> = DateStr::from_str(s);
+		let ir: Result<DateTime, ~str> = ::DateStr::from_str(s);
 		match ir {
 			Ok(dt) => {
 				let dts = dt.timespec();
