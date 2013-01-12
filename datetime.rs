@@ -21,7 +21,7 @@ pub trait Time {
 	static pure fn from_tm(tm: &Tm) -> self;
 }
 
-trait DateTime {
+pub trait DateTime {
 	pure fn timespec(&self) -> Timespec;
 	static pure fn from_timespec(ts: Timespec) -> self;
 	pure fn tm(&self) -> Tm;
@@ -36,7 +36,7 @@ trait DateStr {
 const SECS_FROM_UNIX_EPOCH: i64 = 62135596800;
 
 #[inline(always)]
-pure fn leapyear(y: i32) -> bool { y % 4 == 0 && (y % 100 != 0 || y % 400 == 0) }
+pub pure fn leapyear(y: i32) -> bool { y % 4 == 0 && (y % 100 != 0 || y % 400 == 0) }
 
 const month_lookup_vec: [i32 * 365] = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
                                      2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
@@ -52,7 +52,7 @@ const month_lookup_vec: [i32 * 365] = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
                                      12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12];
 
 #[inline(always)]
-pure fn month_lookup(doy: i32, ly: bool) -> i32 {
+pub pure fn month_lookup(doy: i32, ly: bool) -> i32 {
 	let xtra = (ly && doy > 58) as i32;
 	month_lookup_vec[doy - xtra]
 }
@@ -68,13 +68,13 @@ pure fn accume_days(m: i32, ly: bool) -> i32 {
 const month_length_vec: [i32 * 13] = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 
 #[inline(always)]
-pure fn month_length(m: i32, ly: bool) -> i32 {
+pub pure fn month_length(m: i32, ly: bool) -> i32 {
 	let xtra = (ly && m == 2) as i32;
 	month_length_vec[m] + xtra
 }
 
 #[inline(always)]
-pure fn date_from_days(days: i32) -> { year: i32, mon: i32, mday: i32, yday: i32} {
+pub pure fn date_from_days(days: i32) -> { year: i32, mon: i32, mday: i32, yday: i32} {
 	let n400 = days/146097;
 	let d1 = days % 146097;
 	let n100 = d1/36524;
@@ -97,7 +97,7 @@ pure fn date_from_days(days: i32) -> { year: i32, mon: i32, mday: i32, yday: i32
 }
 
 #[inline(always)]
-pure fn days_from_date(y: i32, m: i32, d: i32) -> i32 {
+pub pure fn days_from_date(y: i32, m: i32, d: i32) -> i32 {
 	let ly = leapyear(y);
 	let ym1 = y - 1;
 	365*ym1 + ym1/4 - ym1/100 + ym1/400 + accume_days(m, ly) + d - 1
@@ -292,7 +292,7 @@ impl DateTime: DateStr {
 #[cfg(test)]
 mod tests {
 	fn test_time(i: i64) {
-		let atime = i as Time;
+		let atime = i as ::Time;
 		log(error, (i, atime.str()));
 		let tm = (atime).tm();
 		let i2: i64 = ::Time::from_tm(&tm);
@@ -300,7 +300,7 @@ mod tests {
 			log(error, (~"test_time failed for:", i, i2, move tm));
 			fail
 		}
-		let ts = (i as Time).timespec();
+		let ts = (i as ::Time).timespec();
 		let i2: i64 = ::Time::from_timespec(ts);
 		if i2 != i {
 			log(error, (~"test_time failed for:", i, i2, ts));
@@ -319,7 +319,7 @@ mod tests {
 	}
 
 	fn test_date(i: i32) {
-		let adate = i as Date;
+		let adate = i as ::Date;
 		log(error, fmt!("%? %s", i, adate.str()));
 		let tm = (adate).tm();
 		let i2: i32 = ::Date::from_tm(&tm);
@@ -327,7 +327,7 @@ mod tests {
 			log(error, (~"test_date failed for:", i, i2, move tm));
 			fail
 		}
-		let ts = (i as Date).timespec();
+		let ts = (i as ::Date).timespec();
 		let i2: i32 = ::Date::from_timespec(ts);
 		if i2 != i {
 			log(error, (~"test_date failed for:", i, i2, ts));
@@ -344,7 +344,7 @@ mod tests {
 	}
 
 	fn test_dt_str(s: &str) {
-		let tsdr: Result<DateTime, ~str> = ::DateStr::from_str(s);
+		let tsdr: Result<::DateTime, ~str> = ::DateStr::from_str(s);
 		match tsdr {
 			Ok(dt) => {
 				let dts = dt.str();
@@ -372,12 +372,12 @@ mod tests {
 	}
 
 	fn test_std_time(s: &str) {
-		let tsr: Result<DateTime, ~str> = ::DateStr::from_str(s);
+		let tsr: Result<::DateTime, ~str> = ::DateStr::from_str(s);
 		match tsr {
 			Ok(gdt) => {
 				let dts = gdt.timespec();
 				let dtm = dts.tm();
-				let stm = at_utc(dts);
+				let stm = ::std::time::at_utc(dts);
 				if stm != dtm {
 					log(error, (~"test_std_time", str::from_slice(s), move dtm, move stm));
 					fail
@@ -393,12 +393,12 @@ mod tests {
 				fail
 			}
 		}
-		let ir: Result<DateTime, ~str> = ::DateStr::from_str(s);
+		let ir: Result<::DateTime, ~str> = ::DateStr::from_str(s);
 		match ir {
 			Ok(dt) => {
 				let dts = dt.timespec();
 				let dtm = dt.tm();
-				let stm = at_utc(dts);
+				let stm = ::std::time::at_utc(dts);
 				if stm != dtm {
 					log(error, (~"test_std_time i64", str::from_slice(s), move dtm, move stm));
 					fail
@@ -452,22 +452,22 @@ mod tests {
 	}
 
 	fn test_funcs(in: i32) {
-		let dt = date_from_days(in);
+		let dt = ::date_from_days(in);
 		if dt.mon < 1 ||
 		   dt.mon > 12 ||
 		   dt.mday < 1 ||
-		   dt.mday > month_length(dt.mon, leapyear(dt.year)) + 1 ||
+		   dt.mday > ::month_length(dt.mon, ::leapyear(dt.year)) + 1 ||
 		   dt.yday < 0 ||
 		   dt.yday > 365 {
 			log(error, (~"test_funcs", in, dt));
 			fail
 		}
-		let d = days_from_date(dt.year, dt.mon, dt.mday);
+		let d = ::days_from_date(dt.year, dt.mon, dt.mday);
 		if d != in {
 			log(error, (~"test_funcs", in, dt, d));
 			fail
 		}
-		log(debug, (~"test_funcs", in, ((in as Date).timespec() as DateTime).str()));
+		log(debug, (~"test_funcs", in, ((in as ::Date).timespec() as ::DateTime).str()));
 	}
 
 	#[test]
@@ -485,8 +485,8 @@ mod tests {
 		let mplier = if os::getenv("RUST_BENCH").is_some() { 100 } else { 1 };
 		let mut i = 0;
 		while i < 10000000*mplier {
-			let _ = month_lookup(i % 366, true);
-			let _ = month_lookup(i % 365, false);
+			let _ = ::month_lookup(i % 366, true);
+			let _ = ::month_lookup(i % 365, false);
 			i += 1;
 		}
 	}
