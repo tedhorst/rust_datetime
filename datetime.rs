@@ -9,28 +9,28 @@ use result::{Result, Ok, Err};
 
 pub trait Date {
 	pure fn timespec(&self) -> Timespec;
-	static pure fn from_timespec(ts: Timespec) -> self;
+	static pure fn from_timespec(ts: Timespec) -> Self;
 	pure fn tm(&self) -> Tm;
-	static pure fn from_tm(tm: &Tm) -> self;
+	static pure fn from_tm(tm: &Tm) -> Self;
 }
 
 pub trait Time {
 	pure fn timespec(&self) -> Timespec;
-	static pure fn from_timespec(ts: Timespec) -> self;
+	static pure fn from_timespec(ts: Timespec) -> Self;
 	pure fn tm(&self) -> Tm;
-	static pure fn from_tm(tm: &Tm) -> self;
+	static pure fn from_tm(tm: &Tm) -> Self;
 }
 
 pub trait DateTime {
 	pure fn timespec(&self) -> Timespec;
-	static pure fn from_timespec(ts: Timespec) -> self;
+	static pure fn from_timespec(ts: Timespec) -> Self;
 	pure fn tm(&self) -> Tm;
-	static pure fn from_tm(tm: &Tm) -> self;
+	static pure fn from_tm(tm: &Tm) -> Self;
 }
 
 trait DateStr {
 	pure fn str(&self) -> ~str;
-	static pure fn from_str(ds: &str) -> Result<self, ~str>;
+	static pure fn from_str(ds: &str) -> Result<Self, ~str>;
 }
 
 const SECS_FROM_UNIX_EPOCH: i64 = 62135596800;
@@ -73,8 +73,10 @@ pub pure fn month_length(m: i32, ly: bool) -> i32 {
 	month_length_vec[m] + xtra
 }
 
+struct DateSpec { year: i32, mon: i32, mday: i32, yday: i32}
+
 #[inline(always)]
-pub pure fn date_from_days(days: i32) -> { year: i32, mon: i32, mday: i32, yday: i32} {
+pub pure fn date_from_days(days: i32) -> DateSpec {
 	let n400 = days/146097;
 	let d1 = days % 146097;
 	let n100 = d1/36524;
@@ -93,7 +95,7 @@ pub pure fn date_from_days(days: i32) -> { year: i32, mon: i32, mday: i32, yday:
 	let ly = leapyear(y);
 	let m = month_lookup(doy, ly);
 	let d = doy - accume_days(m, ly) + 1;
-	{ year: y, mon: m, mday: d, yday: doy}
+	DateSpec { year: y, mon: m, mday: d, yday: doy}
 }
 
 #[inline(always)]
