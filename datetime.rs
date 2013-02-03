@@ -300,13 +300,13 @@ mod tests {
 		let i2: i64 = ::Time::from_tm(&tm);
 		if i2 != i {
 			log(error, (~"test_time failed for:", i, i2, move tm));
-			fail
+			die!()
 		}
 		let ts = (i as ::Time).timespec();
 		let i2: i64 = ::Time::from_timespec(ts);
 		if i2 != i {
 			log(error, (~"test_time failed for:", i, i2, ts));
-			fail
+			die!()
 		}
 	}
 
@@ -327,13 +327,13 @@ mod tests {
 		let i2: i32 = ::Date::from_tm(&tm);
 		if i2 != i {
 			log(error, (~"test_date failed for:", i, i2, move tm));
-			fail
+			die!()
 		}
 		let ts = (i as ::Date).timespec();
 		let i2: i32 = ::Date::from_timespec(ts);
 		if i2 != i {
 			log(error, (~"test_date failed for:", i, i2, ts));
-			fail
+			die!()
 		}
 	}
 
@@ -352,12 +352,12 @@ mod tests {
 				let dts = dt.str();
 				if str::from_slice(s) != dts {
 					log(error, (~"test_dt_str", str::from_slice(s), move dts));
-					fail
+					die!()
 				}
 			}
 			Err(ref es) => {
 				log(error, (~"test_dt_str", str::from_slice(s), copy *es));
-				fail
+				die!()
 			}
 		}
 	}
@@ -382,17 +382,17 @@ mod tests {
 				let stm = ::std::time::at_utc(dts);
 				if stm != dtm {
 					log(error, (~"test_std_time", str::from_slice(s), move dtm, move stm));
-					fail
+					die!()
 				}
 				let sts = dtm.to_timespec();
 				if dts != sts {
 					log(error, (~"test_std_time", str::from_slice(s), dts, sts));
-					fail
+					die!()
 				}
 			}
 			Err(ref es) => {
 				log(error, (~"test_std_time", str::from_slice(s), copy *es));
-				fail
+				die!()
 			}
 		}
 		let ir: Result<::DateTime, ~str> = ::DateStr::from_str(s);
@@ -403,17 +403,17 @@ mod tests {
 				let stm = ::std::time::at_utc(dts);
 				if stm != dtm {
 					log(error, (~"test_std_time i64", str::from_slice(s), move dtm, move stm));
-					fail
+					die!()
 				}
 				let sts = dtm.to_timespec();
 				if dts != sts {
 					log(error, (~"test_std_time i64", str::from_slice(s), dts, sts));
-					fail
+					die!()
 				}
 			}
 			Err(ref es) => {
 				log(error, (~"test_std_time i64", str::from_slice(s), copy *es));
-				fail
+				die!()
 			}
 		}
 	}
@@ -462,12 +462,12 @@ mod tests {
 		   dt.yday < 0 ||
 		   dt.yday > 365 {
 			log(error, (~"test_funcs", in, dt));
-			fail
+			die!()
 		}
 		let d = ::days_from_date(dt.year, dt.mon, dt.mday);
 		if d != in {
 			log(error, (~"test_funcs", in, dt, d));
-			fail
+			die!()
 		}
 		log(debug, (~"test_funcs", in, ((in as ::Date).timespec() as ::DateTime).str()));
 	}
