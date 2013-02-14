@@ -299,14 +299,12 @@ mod tests {
 		let tm = (atime).tm();
 		let i2: i64 = ::Time::from_tm(&tm);
 		if i2 != i {
-			log(error, (~"test_time failed for:", i, i2, move tm));
-			die!()
+			fail!(fmt!("test_time failed for: %?, %?, %?", i, i2, tm))
 		}
 		let ts = (i as ::Time).timespec();
 		let i2: i64 = ::Time::from_timespec(ts);
 		if i2 != i {
-			log(error, (~"test_time failed for:", i, i2, ts));
-			die!()
+			fail!(fmt!("test_time failed for: %?, %?, %?", i, i2, ts))
 		}
 	}
 
@@ -326,14 +324,12 @@ mod tests {
 		let tm = (adate).tm();
 		let i2: i32 = ::Date::from_tm(&tm);
 		if i2 != i {
-			log(error, (~"test_date failed for:", i, i2, move tm));
-			die!()
+			fail!(fmt!("test_date failed for: %?, %?, %?", i, i2, tm))
 		}
 		let ts = (i as ::Date).timespec();
 		let i2: i32 = ::Date::from_timespec(ts);
 		if i2 != i {
-			log(error, (~"test_date failed for:", i, i2, ts));
-			die!()
+			fail!(fmt!("test_date failed for: %?, %?, %?", i, i2, ts))
 		}
 	}
 
@@ -351,13 +347,11 @@ mod tests {
 			Ok(dt) => {
 				let dts = dt.str();
 				if str::from_slice(s) != dts {
-					log(error, (~"test_dt_str", str::from_slice(s), move dts));
-					die!()
+					fail!(fmt!("test_dt_str: %?, %?", s, dts))
 				}
 			}
 			Err(ref es) => {
-				log(error, (~"test_dt_str", str::from_slice(s), copy *es));
-				die!()
+				fail!(fmt!("test_dt_str: %?, %?", s, es))
 			}
 		}
 	}
@@ -381,18 +375,15 @@ mod tests {
 				let dtm = dts.tm();
 				let stm = ::std::time::at_utc(dts);
 				if stm != dtm {
-					log(error, (~"test_std_time", str::from_slice(s), move dtm, move stm));
-					die!()
+					fail!(fmt!("test_std_time: %?, %?, %?", s, dtm, stm))
 				}
 				let sts = dtm.to_timespec();
 				if dts != sts {
-					log(error, (~"test_std_time", str::from_slice(s), dts, sts));
-					die!()
+					fail!(fmt!("test_std_time: %?, %?, %?", s, dts, sts))
 				}
 			}
 			Err(ref es) => {
-				log(error, (~"test_std_time", str::from_slice(s), copy *es));
-				die!()
+				fail!(fmt!("test_std_time: %?, %?", s, es))
 			}
 		}
 		let ir: Result<::DateTime, ~str> = ::DateStr::from_str(s);
@@ -402,18 +393,15 @@ mod tests {
 				let dtm = dt.tm();
 				let stm = ::std::time::at_utc(dts);
 				if stm != dtm {
-					log(error, (~"test_std_time i64", str::from_slice(s), move dtm, move stm));
-					die!()
+					fail!(fmt!("test_std_time i64: %?, %?, %?", s, dtm, stm))
 				}
 				let sts = dtm.to_timespec();
 				if dts != sts {
-					log(error, (~"test_std_time i64", str::from_slice(s), dts, sts));
-					die!()
+					fail!(fmt!("test_std_time i64: %?, %?, %?", s, dts, sts))
 				}
 			}
 			Err(ref es) => {
-				log(error, (~"test_std_time i64", str::from_slice(s), copy *es));
-				die!()
+				fail!(fmt!("test_std_time i64: %?, %?", s, es))
 			}
 		}
 	}
@@ -461,13 +449,11 @@ mod tests {
 		   dt.mday > ::month_length(dt.mon, ::leapyear(dt.year)) + 1 ||
 		   dt.yday < 0 ||
 		   dt.yday > 365 {
-			log(error, (~"test_funcs", in, dt));
-			die!()
+			fail!(fmt!("test_funcs:, %?, %?", in, dt))
 		}
 		let d = ::days_from_date(dt.year, dt.mon, dt.mday);
 		if d != in {
-			log(error, (~"test_funcs", in, dt, d));
-			die!()
+			fail!(fmt!("test_funcs: %?, %?, %?", in, dt, d))
 		}
 		log(debug, (~"test_funcs", in, ((in as ::Date).timespec() as ::DateTime).str()));
 	}
