@@ -105,7 +105,7 @@ pub pure fn days_from_date(y: i32, m: i32, d: i32) -> i32 {
 	365*ym1 + ym1/4 - ym1/100 + ym1/400 + accume_days(m, ly) + d - 1
 }
 
-impl i32: Date {
+impl Date for i32 {
 	//  days since 0001-01-01
 	pure fn timespec(&self) -> Timespec {
 		Timespec { sec: *self as i64*86400 - SECS_FROM_UNIX_EPOCH, nsec: 0 }
@@ -137,7 +137,7 @@ impl i32: Date {
 	}
 }
 
-impl i64: Time {
+impl Time for i64 {
 	//  nanosecond resolution
 	pure fn timespec(&self) -> Timespec {
 		Timespec { sec: (*self % 86400000000000)/1000000000, nsec: (*self % 1000000000) as i32 }
@@ -169,7 +169,7 @@ impl i64: Time {
 	}
 }
 
-impl i64: DateTime {
+impl DateTime for i64 {
 	//  milliseconds since 0001-01-01
 	pure fn timespec(&self) -> Timespec {
 		Timespec { sec: *self/1000 - SECS_FROM_UNIX_EPOCH, nsec: ((*self % 1000)*1000000) as i32 }
@@ -205,7 +205,7 @@ impl i64: DateTime {
 	}
 }
 
-impl Timespec: DateTime {
+impl DateTime for Timespec {
 	pure fn timespec(&self) -> Timespec {
 		*self
 	}
@@ -240,7 +240,7 @@ impl Timespec: DateTime {
 	}
 }
 
-impl Time: DateStr {
+impl DateStr for Time {
 	pure fn str(&self) -> ~str {
 		let tm = self.tm();
 		fmt!("%s%s", tm.strftime("%H:%M:%S"), if tm.tm_nsec != 0 { fmt!("%09i", tm.tm_nsec as int) } else { ~"" })
@@ -257,7 +257,7 @@ impl Time: DateStr {
 	}
 }
 
-impl Date: DateStr {
+impl DateStr for Date {
 	pure fn str(&self) -> ~str {
 		let tm = self.tm();
 		tm.strftime("%Y-%m-%d")
@@ -274,7 +274,7 @@ impl Date: DateStr {
 	}
 }
 
-impl DateTime: DateStr {
+impl DateStr for DateTime {
 	pure fn str(&self) -> ~str {
 		let tm = self.tm();
 		fmt!("%s%s", tm.strftime("%Y-%m-%d %H:%M:%S"), if tm.tm_nsec != 0 { fmt!("%09i", tm.tm_nsec as int) } else { ~"" })
