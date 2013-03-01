@@ -250,7 +250,7 @@ impl DateStr for Time {
 		match strptime(ds, "%H:%M:%S") {
 			Ok(ref tm) => {
 				let atime: i64 = Time::from_tm(tm);
-				Ok(atime as Time)
+				Ok(@atime as Time)
 			}
 			Err(ref es) => { Err(copy *es) }
 		}
@@ -267,7 +267,7 @@ impl DateStr for Date {
 		match strptime(ds, "%Y-%m-%d") {
 			Ok(ref tm) => {
 				let adate: i32 = Date::from_tm(tm);
-				Ok(adate as Date)
+				Ok(@adate as Date)
 			}
 			Err(ref es) => { Err(copy *es) }
 		}
@@ -284,7 +284,7 @@ impl DateStr for DateTime {
 		match strptime(ds, "%Y-%m-%d %H:%M:%S") {
 			Ok(ref tm) => {
 				let ndt: Timespec = DateTime::from_tm(tm);
-				Ok(ndt as DateTime)
+				Ok(@ndt as DateTime)
 			}
 			Err(ref es) => { Err(copy *es) }
 		}
@@ -294,14 +294,14 @@ impl DateStr for DateTime {
 #[cfg(test)]
 mod tests {
 	fn test_time(i: i64) {
-		let atime = i as ::Time;
+		let atime = @i as ::Time;
 		log(error, (i, atime.str()));
 		let tm = (atime).tm();
 		let i2: i64 = ::Time::from_tm(&tm);
 		if i2 != i {
 			fail!(fmt!("test_time failed for: %?, %?, %?", i, i2, tm))
 		}
-		let ts = (i as ::Time).timespec();
+		let ts = (@i as ::Time).timespec();
 		let i2: i64 = ::Time::from_timespec(ts);
 		if i2 != i {
 			fail!(fmt!("test_time failed for: %?, %?, %?", i, i2, ts))
@@ -319,14 +319,14 @@ mod tests {
 	}
 
 	fn test_date(i: i32) {
-		let adate = i as ::Date;
+		let adate = @i as ::Date;
 		log(error, fmt!("%? %s", i, adate.str()));
 		let tm = (adate).tm();
 		let i2: i32 = ::Date::from_tm(&tm);
 		if i2 != i {
 			fail!(fmt!("test_date failed for: %?, %?, %?", i, i2, tm))
 		}
-		let ts = (i as ::Date).timespec();
+		let ts = (@i as ::Date).timespec();
 		let i2: i32 = ::Date::from_timespec(ts);
 		if i2 != i {
 			fail!(fmt!("test_date failed for: %?, %?, %?", i, i2, ts))
@@ -455,7 +455,7 @@ mod tests {
 		if d != in {
 			fail!(fmt!("test_funcs: %?, %?, %?", in, dt, d))
 		}
-		log(debug, (~"test_funcs", in, ((in as ::Date).timespec() as ::DateTime).str()));
+		log(debug, (~"test_funcs", in, (@(@in as ::Date).timespec() as ::DateTime).str()));
 	}
 
 	#[test]
