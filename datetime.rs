@@ -5,7 +5,7 @@
 extern mod std;
 
 use std::time::{Tm, Timespec, strptime, at_utc};
-use result::{Result, Ok, Err};
+use core::result::{Result, Ok, Err};
 
 pub trait Date {
 	pure fn timespec(&self) -> Timespec;
