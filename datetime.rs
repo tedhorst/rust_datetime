@@ -295,7 +295,7 @@ impl DateStr for DateTime {
 mod tests {
 	fn test_time(i: i64) {
 		let atime = @i as ::Time;
-		log(error, (i, atime.str()));
+		error!((i, atime.str()));
 		let tm = (atime).tm();
 		let i2: i64 = ::Time::from_tm(&tm);
 		if i2 != i {
@@ -320,7 +320,7 @@ mod tests {
 
 	fn test_date(i: i32) {
 		let adate = @i as ::Date;
-		log(error, fmt!("%? %s", i, adate.str()));
+		error!("%? %s", i, adate.str());
 		let tm = (adate).tm();
 		let i2: i32 = ::Date::from_tm(&tm);
 		if i2 != i {
@@ -455,7 +455,7 @@ mod tests {
 		if d != in {
 			fail!(fmt!("test_funcs: %?, %?, %?", in, dt, d))
 		}
-		log(debug, (~"test_funcs", in, (@(@in as ::Date).timespec() as ::DateTime).str()));
+		debug!((~"test_funcs", in, (@(@in as ::Date).timespec() as ::DateTime).str()));
 	}
 
 	#[test]
