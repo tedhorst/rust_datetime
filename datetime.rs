@@ -5,40 +5,39 @@
 extern mod std;
 
 use std::time::{Tm, Timespec, strptime, at_utc};
-use core::result::{Result, Ok, Err};
 
 pub trait Date {
-	pure fn timespec(&self) -> Timespec;
-	static pure fn from_timespec(ts: Timespec) -> Self;
-	pure fn tm(&self) -> Tm;
-	static pure fn from_tm(tm: &Tm) -> Self;
+	fn timespec(&self) -> Timespec;
+	fn from_timespec(ts: Timespec) -> Self;
+	fn tm(&self) -> Tm;
+	fn from_tm(tm: &Tm) -> Self;
 }
 
 pub trait Time {
-	pure fn timespec(&self) -> Timespec;
-	static pure fn from_timespec(ts: Timespec) -> Self;
-	pure fn tm(&self) -> Tm;
-	static pure fn from_tm(tm: &Tm) -> Self;
+	fn timespec(&self) -> Timespec;
+	fn from_timespec(ts: Timespec) -> Self;
+	fn tm(&self) -> Tm;
+	fn from_tm(tm: &Tm) -> Self;
 }
 
 pub trait DateTime {
-	pure fn timespec(&self) -> Timespec;
-	static pure fn from_timespec(ts: Timespec) -> Self;
-	pure fn tm(&self) -> Tm;
-	static pure fn from_tm(tm: &Tm) -> Self;
+	fn timespec(&self) -> Timespec;
+	fn from_timespec(ts: Timespec) -> Self;
+	fn tm(&self) -> Tm;
+	fn from_tm(tm: &Tm) -> Self;
 }
-
+/*
 trait DateStr {
-	pure fn str(&self) -> ~str;
-	static pure fn from_str(ds: &str) -> Result<Self, ~str>;
+	fn str(&self) -> ~str;
+	fn from_str(ds: &str) -> Result<Self, ~str>;
 }
-
-const SECS_FROM_UNIX_EPOCH: i64 = 62135596800;
+*/
+static SECS_FROM_UNIX_EPOCH: i64 = 62135596800;
 
 #[inline(always)]
-pub pure fn leapyear(y: i32) -> bool { y % 4 == 0 && (y % 100 != 0 || y % 400 == 0) }
+pub fn leapyear(y: i32) -> bool { y % 4 == 0 && (y % 100 != 0 || y % 400 == 0) }
 
-const month_lookup_vec: [i32 * 365] = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+static month_lookup_vec: [i32 * 365] = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
                                      2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
                                      3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
                                      4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4,
@@ -52,23 +51,23 @@ const month_lookup_vec: [i32 * 365] = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
                                      12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12];
 
 #[inline(always)]
-pub pure fn month_lookup(doy: i32, ly: bool) -> i32 {
+pub fn month_lookup(doy: i32, ly: bool) -> i32 {
 	let xtra = (ly && doy > 58) as i32;
 	month_lookup_vec[doy - xtra]
 }
 
-const accume_days_vec: [i32 * 13] = [0, 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
+static accume_days_vec: [i32 * 13] = [0, 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
 
 #[inline(always)]
-pure fn accume_days(m: i32, ly: bool) -> i32 {
+fn accume_days(m: i32, ly: bool) -> i32 {
 	let xtra = (ly && m > 2) as i32;
 	accume_days_vec[m] + xtra
 }
 
-const month_length_vec: [i32 * 13] = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+static month_length_vec: [i32 * 13] = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 
 #[inline(always)]
-pub pure fn month_length(m: i32, ly: bool) -> i32 {
+pub fn month_length(m: i32, ly: bool) -> i32 {
 	let xtra = (ly && m == 2) as i32;
 	month_length_vec[m] + xtra
 }
@@ -76,7 +75,7 @@ pub pure fn month_length(m: i32, ly: bool) -> i32 {
 struct DateSpec { year: i32, mon: i32, mday: i32, yday: i32}
 
 #[inline(always)]
-pub pure fn date_from_days(days: i32) -> DateSpec {
+pub fn date_from_days(days: i32) -> DateSpec {
 	let n400 = days/146097;
 	let d1 = days % 146097;
 	let n100 = d1/36524;
@@ -99,7 +98,7 @@ pub pure fn date_from_days(days: i32) -> DateSpec {
 }
 
 #[inline(always)]
-pub pure fn days_from_date(y: i32, m: i32, d: i32) -> i32 {
+pub fn days_from_date(y: i32, m: i32, d: i32) -> i32 {
 	let ly = leapyear(y);
 	let ym1 = y - 1;
 	365*ym1 + ym1/4 - ym1/100 + ym1/400 + accume_days(m, ly) + d - 1
@@ -107,15 +106,15 @@ pub pure fn days_from_date(y: i32, m: i32, d: i32) -> i32 {
 
 impl Date for i32 {
 	//  days since 0001-01-01
-	pure fn timespec(&self) -> Timespec {
+	fn timespec(&self) -> Timespec {
 		Timespec { sec: *self as i64*86400 - SECS_FROM_UNIX_EPOCH, nsec: 0 }
 	}
 
-	static pure fn from_timespec(ts: Timespec) -> i32 {
+	fn from_timespec(ts: Timespec) -> i32 {
 		((ts.sec + SECS_FROM_UNIX_EPOCH)/86400) as i32
 	}
 
-	pure fn tm(&self) -> Tm {
+	fn tm(&self) -> Tm {
 		let dp = date_from_days(*self);
 		Tm { tm_sec: 0,
 		  tm_min: 0,
@@ -132,22 +131,22 @@ impl Date for i32 {
 		}
 	}
 
-	static pure fn from_tm(tm: &Tm) -> i32 {
+	fn from_tm(tm: &Tm) -> i32 {
 		days_from_date(tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday)
 	}
 }
 
 impl Time for i64 {
 	//  nanosecond resolution
-	pure fn timespec(&self) -> Timespec {
+	fn timespec(&self) -> Timespec {
 		Timespec { sec: (*self % 86400000000000)/1000000000, nsec: (*self % 1000000000) as i32 }
 	}
 
-	static pure fn from_timespec(ts: Timespec) -> i64 {
+	fn from_timespec(ts: Timespec) -> i64 {
 		(ts.sec % 86400)*1000000000 + ts.nsec as i64
 	}
 
-	pure fn tm(&self) -> Tm {
+	fn tm(&self) -> Tm {
 		let s = (*self % 86400000000000)/1000000000;
 		Tm { tm_sec: (s % 60) as i32,
 		  tm_min: ((s/60) % 60) as i32,
@@ -164,22 +163,22 @@ impl Time for i64 {
 		}
 	}
 
-	static pure fn from_tm(tm: &Tm) -> i64 {
+	fn from_tm(tm: &Tm) -> i64 {
 		tm.tm_hour as i64*3600000000000 + tm.tm_min as i64*60000000000 + tm.tm_sec as i64*1000000000 + tm.tm_nsec as i64
 	}
 }
 
 impl DateTime for i64 {
 	//  milliseconds since 0001-01-01
-	pure fn timespec(&self) -> Timespec {
+	fn timespec(&self) -> Timespec {
 		Timespec { sec: *self/1000 - SECS_FROM_UNIX_EPOCH, nsec: ((*self % 1000)*1000000) as i32 }
 	}
 
-	static pure fn from_timespec(ts: Timespec) -> i64 {
+	fn from_timespec(ts: Timespec) -> i64 {
 		(ts.sec + SECS_FROM_UNIX_EPOCH)*1000 + (ts.nsec as i64)/1000000
 	}
 
-	pure fn tm(&self) -> Tm {
+	fn tm(&self) -> Tm {
 		let d = *self/86400000;
 		let dp = date_from_days(d as i32);
 		let s = (*self % 86400000)/1000;
@@ -198,7 +197,7 @@ impl DateTime for i64 {
 		}
 	}
 
-	static pure fn from_tm(tm: &Tm) -> i64 {
+	fn from_tm(tm: &Tm) -> i64 {
 		let d = days_from_date(tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday);
 		let s = tm.tm_hour as i64*3600 + tm.tm_min as i64*60 + tm.tm_sec as i64;
 		d as i64*86400000 + s*1000 + (tm.tm_nsec as i64)/1000000
@@ -206,15 +205,15 @@ impl DateTime for i64 {
 }
 
 impl DateTime for Timespec {
-	pure fn timespec(&self) -> Timespec {
+	fn timespec(&self) -> Timespec {
 		*self
 	}
 
-	static pure fn from_timespec(ts: Timespec) -> Timespec {
+	fn from_timespec(ts: Timespec) -> Timespec {
 		ts
 	}
 
-	pure fn tm(&self) -> Tm {
+	fn tm(&self) -> Tm {
 		let d = ((*self).sec + SECS_FROM_UNIX_EPOCH)/86400;
 		let dp = date_from_days(d as i32);
 		let s = ((*self).sec + SECS_FROM_UNIX_EPOCH) % 86400;
@@ -233,20 +232,20 @@ impl DateTime for Timespec {
 		}
 	}
 
-	static pure fn from_tm(tm: &Tm) -> Timespec {
+	fn from_tm(tm: &Tm) -> Timespec {
 		let d = days_from_date(tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday) as i64;
 		let s = (tm.tm_hour as i64)*3600 + (tm.tm_min as i64)*60 + tm.tm_sec as i64;
 		Timespec { sec: d*86400 - SECS_FROM_UNIX_EPOCH + s, nsec: tm.tm_nsec }
 	}
 }
-
+/*
 impl DateStr for Time {
-	pure fn str(&self) -> ~str {
+	fn str(&self) -> ~str {
 		let tm = self.tm();
 		fmt!("%s%s", tm.strftime("%H:%M:%S"), if tm.tm_nsec != 0 { fmt!("%09i", tm.tm_nsec as int) } else { ~"" })
 	}
 
-	static pure fn from_str(ds: &str) -> Result<Time, ~str> {
+	fn from_str(ds: &str) -> Result<Time, ~str> {
 		match strptime(ds, "%H:%M:%S") {
 			Ok(ref tm) => {
 				let atime: i64 = Time::from_tm(tm);
@@ -258,12 +257,12 @@ impl DateStr for Time {
 }
 
 impl DateStr for Date {
-	pure fn str(&self) -> ~str {
+	fn str(&self) -> ~str {
 		let tm = self.tm();
 		tm.strftime("%Y-%m-%d")
 	}
 
-	static pure fn from_str(ds: &str) -> Result<Date, ~str> {
+	fn from_str(ds: &str) -> Result<Date, ~str> {
 		match strptime(ds, "%Y-%m-%d") {
 			Ok(ref tm) => {
 				let adate: i32 = Date::from_tm(tm);
@@ -275,12 +274,12 @@ impl DateStr for Date {
 }
 
 impl DateStr for DateTime {
-	pure fn str(&self) -> ~str {
+	fn str(&self) -> ~str {
 		let tm = self.tm();
 		fmt!("%s%s", tm.strftime("%Y-%m-%d %H:%M:%S"), if tm.tm_nsec != 0 { fmt!("%09i", tm.tm_nsec as int) } else { ~"" })
 	}
 
-	static pure fn from_str(ds: &str) -> Result<DateTime, ~str> {
+	fn from_str(ds: &str) -> Result<DateTime, ~str> {
 		match strptime(ds, "%Y-%m-%d %H:%M:%S") {
 			Ok(ref tm) => {
 				let ndt: Timespec = DateTime::from_tm(tm);
@@ -290,18 +289,38 @@ impl DateStr for DateTime {
 		}
 	}
 }
-
+*/
 #[cfg(test)]
 mod tests {
+	use std::time::{Timespec, strptime};
+
+	fn time_str<T: super::Time>(t: T) -> ~str {
+		let tm = t.tm();
+		fmt!("%s%s", tm.strftime("%H:%M:%S"), if tm.tm_nsec != 0 { fmt!("%09i", tm.tm_nsec as int) } else { ~"" })
+
+	}
+
+	fn date_str<T: super::Date>(t: T) -> ~str {
+		let tm = t.tm();
+		tm.strftime("%Y-%m-%d")
+
+	}
+
+	fn datetime_str<T: super::DateTime>(t: T) -> ~str {
+		let tm = t.tm();
+		fmt!("%s%s", tm.strftime("%Y-%m-%d %H:%M:%S"), if tm.tm_nsec != 0 { fmt!("%09i", tm.tm_nsec as int) } else { ~"" })
+
+	}
+
 	fn test_time(i: i64) {
-		let atime = @i as ::Time;
-		error!((i, atime.str()));
+		let atime = @i as @::Time;
+		error!((i, time_str(i)));
 		let tm = (atime).tm();
 		let i2: i64 = ::Time::from_tm(&tm);
 		if i2 != i {
 			fail!(fmt!("test_time failed for: %?, %?, %?", i, i2, tm))
 		}
-		let ts = (@i as ::Time).timespec();
+		let ts = (@i as @::Time).timespec();
 		let i2: i64 = ::Time::from_timespec(ts);
 		if i2 != i {
 			fail!(fmt!("test_time failed for: %?, %?, %?", i, i2, ts))
@@ -319,14 +338,14 @@ mod tests {
 	}
 
 	fn test_date(i: i32) {
-		let adate = @i as ::Date;
-		error!("%? %s", i, adate.str());
+		let adate = @i as @::Date;
+		error!("%? %s", i, date_str(i));
 		let tm = (adate).tm();
 		let i2: i32 = ::Date::from_tm(&tm);
 		if i2 != i {
 			fail!(fmt!("test_date failed for: %?, %?, %?", i, i2, tm))
 		}
-		let ts = (@i as ::Date).timespec();
+		let ts = (@i as @::Date).timespec();
 		let i2: i32 = ::Date::from_timespec(ts);
 		if i2 != i {
 			fail!(fmt!("test_date failed for: %?, %?, %?", i, i2, ts))
@@ -341,11 +360,21 @@ mod tests {
 		test_date(2147483647);
 	}
 
+	fn timespec_from_str(ds: &str) -> Result<Timespec, ~str> {
+		match strptime(ds, "%Y-%m-%d %H:%M:%S") {
+			Ok(ref tm) => {
+				let ndt: Timespec = ::DateTime::from_tm(tm);
+				Ok(ndt)
+			}
+			Err(ref es) => { Err(copy *es) }
+		}
+	}
+
 	fn test_dt_str(s: &str) {
-		let tsdr: Result<::DateTime, ~str> = ::DateStr::from_str(s);
+		let tsdr = timespec_from_str(s);
 		match tsdr {
 			Ok(dt) => {
-				let dts = dt.str();
+				let dts = datetime_str(dt);
 				if str::from_slice(s) != dts {
 					fail!(fmt!("test_dt_str: %?, %?", s, dts))
 				}
@@ -368,7 +397,7 @@ mod tests {
 	}
 
 	fn test_std_time(s: &str) {
-		let tsr: Result<::DateTime, ~str> = ::DateStr::from_str(s);
+		let tsr = timespec_from_str(s);
 		match tsr {
 			Ok(gdt) => {
 				let dts = gdt.timespec();
@@ -386,7 +415,7 @@ mod tests {
 				fail!(fmt!("test_std_time: %?, %?", s, es))
 			}
 		}
-		let ir: Result<::DateTime, ~str> = ::DateStr::from_str(s);
+		let ir = timespec_from_str(s);
 		match ir {
 			Ok(dt) => {
 				let dts = dt.timespec();
@@ -455,7 +484,7 @@ mod tests {
 		if d != in {
 			fail!(fmt!("test_funcs: %?, %?, %?", in, dt, d))
 		}
-		debug!((~"test_funcs", in, (@(@in as ::Date).timespec() as ::DateTime).str()));
+		debug!((~"test_funcs", in, date_str(in)));
 	}
 
 	#[test]
