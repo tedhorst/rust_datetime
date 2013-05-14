@@ -1,5 +1,3 @@
-// NB: transitionary, de-mode-ing.
-#[forbid(deprecated_mode)];
 #[forbid(deprecated_pattern)];
 
 extern mod std;
@@ -375,7 +373,7 @@ mod tests {
 		match tsdr {
 			Ok(dt) => {
 				let dts = datetime_str(dt);
-				if str::from_slice(s) != dts {
+				if s != dts {
 					fail!(fmt!("test_dt_str: %?, %?", s, dts))
 				}
 			}
