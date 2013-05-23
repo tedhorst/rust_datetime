@@ -1,8 +1,8 @@
 #[forbid(deprecated_pattern)];
 
-extern mod std;
+extern mod extra;
 
-use std::time::{Tm, Timespec, strptime, at_utc};
+use extra::time::{Tm, Timespec, strptime, at_utc};
 
 pub trait Date {
 	fn timespec(&self) -> Timespec;
@@ -290,7 +290,7 @@ impl DateStr for DateTime {
 */
 #[cfg(test)]
 mod tests {
-	use std::time::{Timespec, strptime};
+	use extra::time::{Timespec, strptime};
 
 	fn time_str<T: super::Time>(t: T) -> ~str {
 		let tm = t.tm();
@@ -400,7 +400,7 @@ mod tests {
 			Ok(gdt) => {
 				let dts = gdt.timespec();
 				let dtm = dts.tm();
-				let stm = ::std::time::at_utc(dts);
+				let stm = ::extra::time::at_utc(dts);
 				if stm != dtm {
 					fail!(fmt!("test_std_time: %?, %?, %?", s, dtm, stm))
 				}
@@ -418,7 +418,7 @@ mod tests {
 			Ok(dt) => {
 				let dts = dt.timespec();
 				let dtm = dt.tm();
-				let stm = ::std::time::at_utc(dts);
+				let stm = ::extra::time::at_utc(dts);
 				if stm != dtm {
 					fail!(fmt!("test_std_time i64: %?, %?, %?", s, dtm, stm))
 				}
