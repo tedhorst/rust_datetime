@@ -290,6 +290,7 @@ impl DateStr for DateTime {
 */
 #[cfg(test)]
 mod tests {
+	use std::os;
 	use extra::time::{Timespec, strptime};
 
 	fn time_str<T: super::Time>(t: T) -> ~str {
