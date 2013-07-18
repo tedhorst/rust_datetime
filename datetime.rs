@@ -365,7 +365,7 @@ mod tests {
 				let ndt: Timespec = ::DateTime::from_tm(tm);
 				Ok(ndt)
 			}
-			Err(ref es) => { Err(copy *es) }
+			Err(ref es) => { Err(es.clone()) }
 		}
 	}
 
