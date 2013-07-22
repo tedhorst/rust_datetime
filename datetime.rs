@@ -1,5 +1,3 @@
-#[forbid(deprecated_pattern)];
-
 extern mod extra;
 
 use extra::time::{Tm, Timespec, strptime, at_utc};
