@@ -467,21 +467,21 @@ mod tests {
 		test_std_time("10000-01-01 00:00:00");
 	}
 
-	fn test_funcs(in: i32) {
-		let dt = ::date_from_days(in);
+	fn test_funcs(inp: i32) {
+		let dt = ::date_from_days(inp);
 		if dt.mon < 1 ||
 		   dt.mon > 12 ||
 		   dt.mday < 1 ||
 		   dt.mday > ::month_length(dt.mon, ::leapyear(dt.year)) + 1 ||
 		   dt.yday < 0 ||
 		   dt.yday > 365 {
-			fail!(fmt!("test_funcs:, %?, %?", in, dt))
+			fail!(fmt!("test_funcs:, %?, %?", inp, dt))
 		}
 		let d = ::days_from_date(dt.year, dt.mon, dt.mday);
-		if d != in {
-			fail!(fmt!("test_funcs: %?, %?, %?", in, dt, d))
+		if d != inp {
+			fail!(fmt!("test_funcs: %?, %?, %?", inp, dt, d))
 		}
-		debug!((~"test_funcs", in, date_str(in)));
+		debug!((~"test_funcs", inp, date_str(inp)));
 	}
 
 	#[test]
