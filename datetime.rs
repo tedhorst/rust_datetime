@@ -290,6 +290,7 @@ impl DateStr for DateTime {
 mod tests {
 	use std::os;
 	use extra::time::{Timespec, strptime};
+	use extra::test;
 
 	fn time_str<T: super::Time>(t: T) -> ~str {
 		let tm = t.tm();
@@ -494,14 +495,15 @@ mod tests {
 		}
 	}
 
-	#[test]
-	fn test_ml_perf() {
-		let mplier = if os::getenv("RUST_BENCH").is_some() { 100 } else { 1 };
-		let mut i = 0;
-		while i < 10000000*mplier {
-			let _ = ::month_lookup(i % 366, true);
-			let _ = ::month_lookup(i % 365, false);
-			i += 1;
+	#[bench]
+	fn test_ml_perf(b: &mut test::BenchHarness) {
+		do b.iter {
+			let mut i = 0;
+			while i <= 366 {
+				let _ = ::month_lookup(i % 366, true);
+				let _ = ::month_lookup(i % 365, false);
+				i += 1;
+			}
 		}
 	}
 }
