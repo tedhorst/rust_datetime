@@ -294,7 +294,7 @@ mod tests {
 
 	fn time_str<T: super::Time>(t: T) -> ~str {
 		let tm = t.tm();
-		fmt!("%s%s", tm.strftime("%H:%M:%S"), if tm.tm_nsec != 0 { fmt!("%09i", tm.tm_nsec as int) } else { ~"" })
+		format!("{}{}", tm.strftime("%H:%M:%S"), if tm.tm_nsec != 0 { format!("{:09i}", tm.tm_nsec as int) } else { ~"" })
 
 	}
 
@@ -306,22 +306,22 @@ mod tests {
 
 	fn datetime_str<T: super::DateTime>(t: T) -> ~str {
 		let tm = t.tm();
-		fmt!("%s%s", tm.strftime("%Y-%m-%d %H:%M:%S"), if tm.tm_nsec != 0 { fmt!("%09i", tm.tm_nsec as int) } else { ~"" })
+		format!("{}{}", tm.strftime("%Y-%m-%d %H:%M:%S"), if tm.tm_nsec != 0 { format!("{:09i}", tm.tm_nsec as int) } else { ~"" })
 
 	}
 
 	fn test_time(i: i64) {
 		let atime = @i as @::Time;
-		error!((i, time_str(i)));
+		error!("{}, {}", i, time_str(i));
 		let tm = (atime).tm();
 		let i2: i64 = ::Time::from_tm(&tm);
 		if i2 != i {
-			fail!(fmt!("test_time failed for: %?, %?, %?", i, i2, tm))
+			fail!(format!("test_time failed for: {}, {}, {:?}", i, i2, tm))
 		}
 		let ts = (@i as @::Time).timespec();
 		let i2: i64 = ::Time::from_timespec(ts);
 		if i2 != i {
-			fail!(fmt!("test_time failed for: %?, %?, %?", i, i2, ts))
+			fail!(format!("test_time failed for: {}, {}, {:?}", i, i2, ts))
 		}
 	}
 
@@ -337,16 +337,16 @@ mod tests {
 
 	fn test_date(i: i32) {
 		let adate = @i as @::Date;
-		error!("%? %s", i, date_str(i));
+		error!("{} {}", i, date_str(i));
 		let tm = (adate).tm();
 		let i2: i32 = ::Date::from_tm(&tm);
 		if i2 != i {
-			fail!(fmt!("test_date failed for: %?, %?, %?", i, i2, tm))
+			fail!(format!("test_date failed for: {}, {}, {:?}", i, i2, tm))
 		}
 		let ts = (@i as @::Date).timespec();
 		let i2: i32 = ::Date::from_timespec(ts);
 		if i2 != i {
-			fail!(fmt!("test_date failed for: %?, %?, %?", i, i2, ts))
+			fail!(format!("test_date failed for: {}, {}, {:?}", i, i2, ts))
 		}
 	}
 
@@ -374,11 +374,11 @@ mod tests {
 			Ok(dt) => {
 				let dts = datetime_str(dt);
 				if s != dts {
-					fail!(fmt!("test_dt_str: %?, %?", s, dts))
+					fail!(format!("test_dt_str: {}, {}", s, dts))
 				}
 			}
 			Err(ref es) => {
-				fail!(fmt!("test_dt_str: %?, %?", s, es))
+				fail!(format!("test_dt_str: {}, {:?}", s, es))
 			}
 		}
 	}
@@ -402,15 +402,15 @@ mod tests {
 				let dtm = dts.tm();
 				let stm = ::extra::time::at_utc(dts);
 				if stm != dtm {
-					fail!(fmt!("test_std_time: %?, %?, %?", s, dtm, stm))
+					fail!(format!("test_std_time: {}, {:?}, {:?}", s, dtm, stm))
 				}
 				let sts = dtm.to_timespec();
 				if dts != sts {
-					fail!(fmt!("test_std_time: %?, %?, %?", s, dts, sts))
+					fail!(format!("test_std_time: {}, {:?}, {:?}", s, dts, sts))
 				}
 			}
 			Err(ref es) => {
-				fail!(fmt!("test_std_time: %?, %?", s, es))
+				fail!(format!("test_std_time: {}, {:?}", s, es))
 			}
 		}
 		let ir = timespec_from_str(s);
@@ -420,15 +420,15 @@ mod tests {
 				let dtm = dt.tm();
 				let stm = ::extra::time::at_utc(dts);
 				if stm != dtm {
-					fail!(fmt!("test_std_time i64: %?, %?, %?", s, dtm, stm))
+					fail!(format!("test_std_time i64: {}, {:?}, {:?}", s, dtm, stm))
 				}
 				let sts = dtm.to_timespec();
 				if dts != sts {
-					fail!(fmt!("test_std_time i64: %?, %?, %?", s, dts, sts))
+					fail!(format!("test_std_time i64: {}, {:?}, {:?}", s, dts, sts))
 				}
 			}
 			Err(ref es) => {
-				fail!(fmt!("test_std_time i64: %?, %?", s, es))
+				fail!(format!("test_std_time i64: {}, {:?}", s, es))
 			}
 		}
 	}
@@ -476,13 +476,13 @@ mod tests {
 		   dt.mday > ::month_length(dt.mon, ::leapyear(dt.year)) + 1 ||
 		   dt.yday < 0 ||
 		   dt.yday > 365 {
-			fail!(fmt!("test_funcs:, %?, %?", inp, dt))
+			fail!(format!("test_funcs:, {}, {:?}", inp, dt))
 		}
 		let d = ::days_from_date(dt.year, dt.mon, dt.mday);
 		if d != inp {
-			fail!(fmt!("test_funcs: %?, %?, %?", inp, dt, d))
+			fail!(format!("test_funcs: {}, {:?}, {}", inp, dt, d))
 		}
-		debug!((~"test_funcs", inp, date_str(inp)));
+		debug!("test_funcs {} {}", inp, date_str(inp));
 	}
 
 	#[test]
