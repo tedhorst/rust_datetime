@@ -288,7 +288,7 @@ impl DateStr for DateTime {
 */
 #[cfg(test)]
 mod tests {
-	use std::os;
+	use std::{os, fmt};
 	use extra::time::{Timespec, strptime};
 	use extra::test;
 
@@ -310,16 +310,15 @@ mod tests {
 
 	}
 
-	fn test_time(i: i64) {
-		let atime = @i as @::Time;
-		error!("{}, {}", i, time_str(i));
-		let tm = (atime).tm();
-		let i2: i64 = ::Time::from_tm(&tm);
+	fn test_time<T: Eq + fmt::Default + Clone + ::Time>(i: T) {
+		error!("{}, {}", i, time_str(i.clone()));
+		let tm = i.tm();
+		let i2: T = ::Time::from_tm(&tm);
 		if i2 != i {
 			fail!(format!("test_time failed for: {}, {}, {:?}", i, i2, tm))
 		}
-		let ts = (@i as @::Time).timespec();
-		let i2: i64 = ::Time::from_timespec(ts);
+		let ts = i.timespec();
+		let i2: T = ::Time::from_timespec(ts);
 		if i2 != i {
 			fail!(format!("test_time failed for: {}, {}, {:?}", i, i2, ts))
 		}
@@ -327,24 +326,23 @@ mod tests {
 
 	#[test]
 	fn test_some_times() {
-		test_time(0);
-		test_time(1);
-		test_time(-1);
-		test_time(86399999999998);
-		test_time(86399999999999);
-		test_time(-86399999999999);
+		test_time(0_i64);
+		test_time(1_i64);
+		test_time(-1_i64);
+		test_time(86399999999998_i64);
+		test_time(86399999999999_i64);
+		test_time(-86399999999999_i64);
 	}
 
-	fn test_date(i: i32) {
-		let adate = @i as @::Date;
-		error!("{} {}", i, date_str(i));
-		let tm = (adate).tm();
-		let i2: i32 = ::Date::from_tm(&tm);
+	fn test_date<T: Eq + fmt::Default + Clone + ::Date>(i: T) {
+		error!("{} {}", i, date_str(i.clone()));
+		let tm = i.tm();
+		let i2: T = ::Date::from_tm(&tm);
 		if i2 != i {
 			fail!(format!("test_date failed for: {}, {}, {:?}", i, i2, tm))
 		}
-		let ts = (@i as @::Date).timespec();
-		let i2: i32 = ::Date::from_timespec(ts);
+		let ts = i.timespec();
+		let i2: T = ::Date::from_timespec(ts);
 		if i2 != i {
 			fail!(format!("test_date failed for: {}, {}, {:?}", i, i2, ts))
 		}
@@ -352,10 +350,10 @@ mod tests {
 
 	#[test]
 	fn test_some_dates() {
-		test_date(0);
-		test_date(1);
-		test_date(2147483646);
-		test_date(2147483647);
+		test_date(0_i32);
+		test_date(1_i32);
+		test_date(2147483646_i32);
+		test_date(2147483647_i32);
 	}
 
 	fn timespec_from_str(ds: &str) -> Result<Timespec, ~str> {
