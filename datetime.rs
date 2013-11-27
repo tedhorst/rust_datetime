@@ -495,13 +495,13 @@ mod tests {
 
 	#[bench]
 	fn test_ml_perf(b: &mut test::BenchHarness) {
-		do b.iter {
+		b.iter(|| {
 			let mut i = 0;
 			while i <= 366 {
 				let _ = ::month_lookup(i % 366, true);
 				let _ = ::month_lookup(i % 365, false);
 				i += 1;
 			}
-		}
+		})
 	}
 }
