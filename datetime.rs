@@ -288,9 +288,9 @@ impl DateStr for DateTime {
 */
 #[cfg(test)]
 mod tests {
+	extern crate test;
 	use std::{os, fmt};
 	use extra::time::{Timespec, strptime};
-	use extra::test;
 	use super::DateTime;
 
 	fn time_str<T: super::Time>(t: T) -> ~str {
