@@ -1,6 +1,6 @@
-extern crate extra;
+extern crate time;
 
-use extra::time::{Tm, Timespec, strptime, at_utc};
+use time::{Tm, Timespec, strptime, at_utc};
 
 pub trait Date {
 	fn timespec(&self) -> Timespec;
@@ -290,7 +290,7 @@ impl DateStr for DateTime {
 mod tests {
 	extern crate test;
 	use std::{os, fmt};
-	use extra::time::{Timespec, strptime};
+	use time::{Timespec, strptime};
 	use super::DateTime;
 
 	fn time_str<T: super::Time>(t: T) -> ~str {
@@ -399,7 +399,7 @@ mod tests {
 			Ok(gdt) => {
 				let dts = gdt.timespec();
 				let dtm = dts.tm();
-				let stm = ::extra::time::at_utc(dts);
+				let stm = ::time::at_utc(dts);
 				if stm != dtm {
 					fail!(format!("test_std_time: {}, {:?}, {:?}", s, dtm, stm))
 				}
@@ -417,7 +417,7 @@ mod tests {
 			Ok(dt) => {
 				let dts = dt.timespec();
 				let dtm = dt.tm();
-				let stm = ::extra::time::at_utc(dts);
+				let stm = ::time::at_utc(dts);
 				if stm != dtm {
 					fail!(format!("test_std_time i64: {}, {:?}, {:?}", s, dtm, stm))
 				}
