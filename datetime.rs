@@ -68,7 +68,7 @@ pub fn month_length(m: i32, ly: bool) -> i32 {
 	month_length_vec[m] + xtra
 }
 
-struct DateSpec { year: i32, mon: i32, mday: i32, yday: i32}
+pub struct DateSpec { year: i32, mon: i32, mday: i32, yday: i32}
 
 #[inline(always)]
 pub fn date_from_days(days: i32) -> DateSpec {
