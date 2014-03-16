@@ -1,3 +1,6 @@
+#[feature(phase)];
+#[phase(syntax, link)] extern crate log;
+
 extern crate time;
 
 use time::{Tm, Timespec, strptime, at_utc};
