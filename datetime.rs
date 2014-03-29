@@ -1,9 +1,9 @@
-#[feature(phase)];
+#![feature(phase)]
 #[phase(syntax, link)] extern crate log;
 
 extern crate time;
 
-use time::{Tm, Timespec, strptime, at_utc};
+use time::{Tm, Timespec};
 
 pub trait Date {
 	fn timespec(&self) -> Timespec;
