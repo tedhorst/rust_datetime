@@ -52,7 +52,7 @@ static month_lookup_vec: [i32, ..365] = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
 #[inline(always)]
 pub fn month_lookup(doy: i32, ly: bool) -> i32 {
 	let xtra = (ly && doy > 58) as i32;
-	month_lookup_vec[doy - xtra]
+	month_lookup_vec[(doy - xtra) as uint]
 }
 
 static accume_days_vec: [i32, ..13] = [0, 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
@@ -60,7 +60,7 @@ static accume_days_vec: [i32, ..13] = [0, 0, 31, 59, 90, 120, 151, 181, 212, 243
 #[inline(always)]
 fn accume_days(m: i32, ly: bool) -> i32 {
 	let xtra = (ly && m > 2) as i32;
-	accume_days_vec[m] + xtra
+	accume_days_vec[m as uint] + xtra
 }
 
 static month_length_vec: [i32, ..13] = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
@@ -68,7 +68,7 @@ static month_length_vec: [i32, ..13] = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 3
 #[inline(always)]
 pub fn month_length(m: i32, ly: bool) -> i32 {
 	let xtra = (ly && m == 2) as i32;
-	month_length_vec[m] + xtra
+	month_length_vec[m as uint] + xtra
 }
 
 pub struct DateSpec { year: i32, mon: i32, mday: i32, yday: i32}
