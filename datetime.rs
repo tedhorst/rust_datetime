@@ -498,7 +498,7 @@ mod tests {
 	}
 
 	#[bench]
-	fn test_ml_perf(b: &mut test::BenchHarness) {
+	fn test_ml_perf(b: &mut test::Bencher) {
 		b.iter(|| {
 			let mut i = 0;
 			while i <= 366 {
