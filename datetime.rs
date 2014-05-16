@@ -296,21 +296,21 @@ mod tests {
 	use time::{Timespec, strptime};
 	use super::DateTime;
 
-	fn time_str<T: super::Time>(t: T) -> ~str {
+	fn time_str<T: super::Time>(t: T) -> StrBuf {
 		let tm = t.tm();
-		format!("{}{}", tm.strftime("%H:%M:%S"), if tm.tm_nsec != 0 { format!("{:09i}", tm.tm_nsec as int) } else { "".to_owned() })
+		format_strbuf!("{}{}", tm.strftime("%H:%M:%S"), if tm.tm_nsec != 0 { format_strbuf!("{:09i}", tm.tm_nsec as int) } else { "".to_strbuf() })
 
 	}
 
-	fn date_str<T: super::Date>(t: T) -> ~str {
+	fn date_str<T: super::Date>(t: T) -> StrBuf {
 		let tm = t.tm();
 		tm.strftime("%Y-%m-%d")
 
 	}
 
-	fn datetime_str<T: super::DateTime>(t: T) -> ~str {
+	fn datetime_str<T: super::DateTime>(t: T) -> StrBuf {
 		let tm = t.tm();
-		format!("{}{}", tm.strftime("%Y-%m-%d %H:%M:%S"), if tm.tm_nsec != 0 { format!("{:09i}", tm.tm_nsec as int) } else { "".to_owned() })
+		format_strbuf!("{}{}", tm.strftime("%Y-%m-%d %H:%M:%S"), if tm.tm_nsec != 0 { format_strbuf!("{:09i}", tm.tm_nsec as int) } else { "".to_strbuf() })
 
 	}
 
@@ -360,7 +360,7 @@ mod tests {
 		test_date(2147483647_i32);
 	}
 
-	fn timespec_from_str(ds: &str) -> Result<Timespec, ~str> {
+	fn timespec_from_str(ds: &str) -> Result<Timespec, StrBuf> {
 		match strptime(ds, "%Y-%m-%d %H:%M:%S") {
 			Ok(ref tm) => {
 				let ndt: Timespec = ::DateTime::from_tm(tm);
@@ -375,7 +375,7 @@ mod tests {
 		match tsdr {
 			Ok(dt) => {
 				let dts = datetime_str(dt);
-				if s != dts {
+				if s.to_strbuf() != dts {
 					fail!(format!("test_dt_str: {}, {}", s, dts))
 				}
 			}
