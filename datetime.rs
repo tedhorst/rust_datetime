@@ -125,7 +125,6 @@ impl Date for i32 {
 		  tm_yday: dp.yday,
 		  tm_isdst: 0,
 		  tm_gmtoff: 0,
-		  tm_zone: "UTC".to_owned(),
 		  tm_nsec: 0
 		}
 	}
@@ -157,7 +156,6 @@ impl Time for i64 {
 		  tm_yday: 0,
 		  tm_isdst: 0,
 		  tm_gmtoff: 0,
-		  tm_zone: "UTC".to_owned(),
 		  tm_nsec: (*self % 1000000000) as i32
 		}
 	}
@@ -191,7 +189,6 @@ impl DateTime for i64 {
 		  tm_yday: dp.yday,
 		  tm_isdst: 0,
 		  tm_gmtoff: 0,
-		  tm_zone: "UTC".to_owned(),
 		  tm_nsec: 1000000*(*self % 1000) as i32
 		}
 	}
@@ -226,7 +223,6 @@ impl DateTime for Timespec {
 		  tm_yday: dp.yday,
 		  tm_isdst: 0,
 		  tm_gmtoff: 0,
-		  tm_zone: "UTC".to_owned(),
 		  tm_nsec: (*self).nsec
 		}
 	}
