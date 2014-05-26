@@ -292,19 +292,19 @@ mod tests {
 	use time::{Timespec, strptime};
 	use super::DateTime;
 
-	fn time_str<T: super::Time>(t: T) -> StrBuf {
+	fn time_str<T: super::Time>(t: T) -> String {
 		let tm = t.tm();
 		format_strbuf!("{}{}", tm.strftime("%H:%M:%S"), if tm.tm_nsec != 0 { format_strbuf!("{:09i}", tm.tm_nsec as int) } else { "".to_strbuf() })
 
 	}
 
-	fn date_str<T: super::Date>(t: T) -> StrBuf {
+	fn date_str<T: super::Date>(t: T) -> String {
 		let tm = t.tm();
 		tm.strftime("%Y-%m-%d")
 
 	}
 
-	fn datetime_str<T: super::DateTime>(t: T) -> StrBuf {
+	fn datetime_str<T: super::DateTime>(t: T) -> String {
 		let tm = t.tm();
 		format_strbuf!("{}{}", tm.strftime("%Y-%m-%d %H:%M:%S"), if tm.tm_nsec != 0 { format_strbuf!("{:09i}", tm.tm_nsec as int) } else { "".to_strbuf() })
 
@@ -356,7 +356,7 @@ mod tests {
 		test_date(2147483647_i32);
 	}
 
-	fn timespec_from_str(ds: &str) -> Result<Timespec, StrBuf> {
+	fn timespec_from_str(ds: &str) -> Result<Timespec, String> {
 		match strptime(ds, "%Y-%m-%d %H:%M:%S") {
 			Ok(ref tm) => {
 				let ndt: Timespec = ::DateTime::from_tm(tm);
