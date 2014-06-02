@@ -311,7 +311,7 @@ mod tests {
 
 	}
 
-	fn test_time<T: PartialEq + fmt::Show + Clone + ::Time>(i: T) {
+	fn test_time<T: Eq + fmt::Show + Clone + ::Time>(i: T) {
 		error!("{}, {}", i, time_str(i.clone()));
 		let tm = i.tm();
 		let i2: T = ::Time::from_tm(&tm);
@@ -335,7 +335,7 @@ mod tests {
 		test_time(-86399999999999_i64);
 	}
 
-	fn test_date<T: PartialEq + fmt::Show + Clone + ::Date>(i: T) {
+	fn test_date<T: Eq + fmt::Show + Clone + ::Date>(i: T) {
 		error!("{} {}", i, date_str(i.clone()));
 		let tm = i.tm();
 		let i2: T = ::Date::from_tm(&tm);
