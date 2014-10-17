@@ -295,19 +295,19 @@ mod tests {
 
 	fn time_str<T: super::Time>(t: T) -> String {
 		let tm = t.tm();
-		format!("{}{}", tm.strftime("%H:%M:%S"), if tm.tm_nsec != 0 { format!("{:09i}", tm.tm_nsec as int) } else { "".to_string() })
+		format!("{}{}", tm.strftime("%H:%M:%S").unwrap(), if tm.tm_nsec != 0 { format!("{:09i}", tm.tm_nsec as int) } else { "".to_string() })
 
 	}
 
 	fn date_str<T: super::Date>(t: T) -> String {
 		let tm = t.tm();
-		tm.strftime("%Y-%m-%d")
+		tm.strftime("%Y-%m-%d").unwrap()
 
 	}
 
 	fn datetime_str<T: super::DateTime>(t: T) -> String {
 		let tm = t.tm();
-		format!("{}{}", tm.strftime("%Y-%m-%d %H:%M:%S"), if tm.tm_nsec != 0 { format!("{:09i}", tm.tm_nsec as int) } else { "".to_string() })
+		format!("{}{}", tm.strftime("%Y-%m-%d %H:%M:%S").unwrap(), if tm.tm_nsec != 0 { format!("{:09i}", tm.tm_nsec as int) } else { "".to_string() })
 
 	}
 
@@ -363,7 +363,7 @@ mod tests {
 				let ndt: Timespec = ::DateTime::from_tm(tm);
 				Ok(ndt)
 			}
-			Err(ref es) => { Err(es.clone()) }
+			Err(ref es) => { Err(es.to_string()) }
 		}
 	}
 
@@ -373,11 +373,11 @@ mod tests {
 			Ok(dt) => {
 				let dts = datetime_str(dt);
 				if s.to_string() != dts {
-					fail!(format!("test_dt_str: {}, {}", s, dts))
+					fail!(format!("test_dt_str: {} != {}", s, dts))
 				}
 			}
 			Err(ref es) => {
-				fail!(format!("test_dt_str: {}, {}", s, es))
+				fail!(format!("test_dt_str: {}, error: {}", s, es))
 			}
 		}
 	}
