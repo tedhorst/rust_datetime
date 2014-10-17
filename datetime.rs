@@ -36,7 +36,7 @@ static SECS_FROM_UNIX_EPOCH: i64 = 62135596800;
 #[inline(always)]
 pub fn leapyear(y: i32) -> bool { y % 4 == 0 && (y % 100 != 0 || y % 400 == 0) }
 
-static month_lookup_vec: [i32, ..365] = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+static MONTH_LOOKUP_VEC: [i32, ..365] = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
                                          2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
                                          3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
                                          4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4,
@@ -52,23 +52,23 @@ static month_lookup_vec: [i32, ..365] = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
 #[inline(always)]
 pub fn month_lookup(doy: i32, ly: bool) -> i32 {
 	let xtra = (ly && doy > 58) as i32;
-	month_lookup_vec[(doy - xtra) as uint]
+	MONTH_LOOKUP_VEC[(doy - xtra) as uint]
 }
 
-static accume_days_vec: [i32, ..13] = [0, 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
+static ACCUME_DAYS_VEC: [i32, ..13] = [0, 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
 
 #[inline(always)]
 fn accume_days(m: i32, ly: bool) -> i32 {
 	let xtra = (ly && m > 2) as i32;
-	accume_days_vec[m as uint] + xtra
+	ACCUME_DAYS_VEC[m as uint] + xtra
 }
 
-static month_length_vec: [i32, ..13] = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+static MONTH_LENGTH_VEC: [i32, ..13] = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 
 #[inline(always)]
 pub fn month_length(m: i32, ly: bool) -> i32 {
 	let xtra = (ly && m == 2) as i32;
-	month_length_vec[m as uint] + xtra
+	MONTH_LENGTH_VEC[m as uint] + xtra
 }
 
 #[deriving(Show)]
