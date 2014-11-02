@@ -316,12 +316,12 @@ mod tests {
 		let tm = i.tm();
 		let i2: T = ::Time::from_tm(&tm);
 		if i2 != i {
-			fail!(format!("test_time failed for: {}, {}, {}", i, i2, tm))
+			panic!(format!("test_time failed for: {}, {}, {}", i, i2, tm))
 		}
 		let ts = i.timespec();
 		let i2: T = ::Time::from_timespec(ts);
 		if i2 != i {
-			fail!(format!("test_time failed for: {}, {}, {}", i, i2, ts))
+			panic!(format!("test_time failed for: {}, {}, {}", i, i2, ts))
 		}
 	}
 
@@ -340,12 +340,12 @@ mod tests {
 		let tm = i.tm();
 		let i2: T = ::Date::from_tm(&tm);
 		if i2 != i {
-			fail!(format!("test_date failed for: {}, {}, {}", i, i2, tm))
+			panic!(format!("test_date failed for: {}, {}, {}", i, i2, tm))
 		}
 		let ts = i.timespec();
 		let i2: T = ::Date::from_timespec(ts);
 		if i2 != i {
-			fail!(format!("test_date failed for: {}, {}, {}", i, i2, ts))
+			panic!(format!("test_date failed for: {}, {}, {}", i, i2, ts))
 		}
 	}
 
@@ -373,11 +373,11 @@ mod tests {
 			Ok(dt) => {
 				let dts = datetime_str(dt);
 				if s.to_string() != dts {
-					fail!(format!("test_dt_str: {} != {}", s, dts))
+					panic!(format!("test_dt_str: {} != {}", s, dts))
 				}
 			}
 			Err(ref es) => {
-				fail!(format!("test_dt_str: {}, error: {}", s, es))
+				panic!(format!("test_dt_str: {}, error: {}", s, es))
 			}
 		}
 	}
@@ -401,15 +401,15 @@ mod tests {
 				let dtm = dts.tm();
 				let stm = ::time::at_utc(dts);
 				if stm != dtm {
-					fail!(format!("test_std_time: {}, {}, {}", s, dtm, stm))
+					panic!(format!("test_std_time: {}, {}, {}", s, dtm, stm))
 				}
 				let sts = dtm.to_timespec();
 				if dts != sts {
-					fail!(format!("test_std_time: {}, {}, {}", s, dts, sts))
+					panic!(format!("test_std_time: {}, {}, {}", s, dts, sts))
 				}
 			}
 			Err(ref es) => {
-				fail!(format!("test_std_time: {}, {}", s, es))
+				panic!(format!("test_std_time: {}, {}", s, es))
 			}
 		}
 		let ir = timespec_from_str(s);
@@ -419,15 +419,15 @@ mod tests {
 				let dtm = dt.tm();
 				let stm = ::time::at_utc(dts);
 				if stm != dtm {
-					fail!(format!("test_std_time i64: {}, {}, {}", s, dtm, stm))
+					panic!(format!("test_std_time i64: {}, {}, {}", s, dtm, stm))
 				}
 				let sts = dtm.to_timespec();
 				if dts != sts {
-					fail!(format!("test_std_time i64: {}, {}, {}", s, dts, sts))
+					panic!(format!("test_std_time i64: {}, {}, {}", s, dts, sts))
 				}
 			}
 			Err(ref es) => {
-				fail!(format!("test_std_time i64: {}, {}", s, es))
+				panic!(format!("test_std_time i64: {}, {}", s, es))
 			}
 		}
 	}
@@ -475,11 +475,11 @@ mod tests {
 		   dt.mday > ::month_length(dt.mon, ::leapyear(dt.year)) + 1 ||
 		   dt.yday < 0 ||
 		   dt.yday > 365 {
-			fail!(format!("test_funcs:, {}, {}", inp, dt))
+			panic!(format!("test_funcs:, {}, {}", inp, dt))
 		}
 		let d = ::days_from_date(dt.year, dt.mon, dt.mday);
 		if d != inp {
-			fail!(format!("test_funcs: {}, {}, {}", inp, dt, d))
+			panic!(format!("test_funcs: {}, {}, {}", inp, dt, d))
 		}
 		debug!("test_funcs {} {}", inp, date_str(inp));
 	}
