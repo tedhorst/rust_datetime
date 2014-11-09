@@ -301,8 +301,10 @@ mod tests {
 
 	fn date_str<T: super::Date>(t: T) -> String {
 		let tm = t.tm();
-		tm.strftime("%Y-%m-%d").unwrap()
-
+		match tm.strftime("%Y-%m-%d") {
+			Ok(x) => x.to_string(),
+			Err(x) => x.to_string()
+		}
 	}
 
 	fn datetime_str<T: super::DateTime>(t: T) -> String {
@@ -312,7 +314,7 @@ mod tests {
 	}
 
 	fn test_time<T: Eq + fmt::Show + Clone + ::Time>(i: T) {
-		error!("{}, {}", i, time_str(i.clone()));
+		debug!("test_time: {}, {}", i, time_str(i.clone()));
 		let tm = i.tm();
 		let i2: T = ::Time::from_tm(&tm);
 		if i2 != i {
@@ -336,7 +338,7 @@ mod tests {
 	}
 
 	fn test_date<T: Eq + fmt::Show + Clone + ::Date>(i: T) {
-		error!("{} {}", i, date_str(i.clone()));
+		debug!("test_date: {} {}", i, date_str(i.clone()));
 		let tm = i.tm();
 		let i2: T = ::Date::from_tm(&tm);
 		if i2 != i {
@@ -368,6 +370,7 @@ mod tests {
 	}
 
 	fn test_dt_str(s: &str) {
+		debug!("test_dt_str: {}", s);
 		let tsdr = timespec_from_str(s);
 		match tsdr {
 			Ok(dt) => {
@@ -394,6 +397,7 @@ mod tests {
 	}
 
 	fn test_std_time(s: &str) {
+		debug!("test_std_time: {}", s);
 		let tsr = timespec_from_str(s);
 		match tsr {
 			Ok(gdt) => {
