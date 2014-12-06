@@ -295,7 +295,7 @@ mod tests {
 
 	fn time_str<T: super::Time>(t: T) -> String {
 		let tm = t.tm();
-		format!("{}{}", tm.strftime("%H:%M:%S").unwrap(), if tm.tm_nsec != 0 { format!("{:09i}", tm.tm_nsec as int) } else { "".to_string() })
+		format!("{}{}", tm.strftime("%H:%M:%S").unwrap(), if tm.tm_nsec != 0 { format!("{:09b}", tm.tm_nsec as int) } else { "".to_string() })
 
 	}
 
@@ -309,7 +309,7 @@ mod tests {
 
 	fn datetime_str<T: super::DateTime>(t: T) -> String {
 		let tm = t.tm();
-		format!("{}{}", tm.strftime("%Y-%m-%d %H:%M:%S").unwrap(), if tm.tm_nsec != 0 { format!("{:09i}", tm.tm_nsec as int) } else { "".to_string() })
+		format!("{}{}", tm.strftime("%Y-%m-%d %H:%M:%S").unwrap(), if tm.tm_nsec != 0 { format!("{:09b}", tm.tm_nsec as int) } else { "".to_string() })
 
 	}
 
