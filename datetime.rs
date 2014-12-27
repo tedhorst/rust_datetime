@@ -71,7 +71,7 @@ pub fn month_length(m: i32, ly: bool) -> i32 {
 	MONTH_LENGTH_VEC[m as uint] + xtra
 }
 
-#[deriving(Show)]
+#[deriving(Show, Copy)]
 pub struct DateSpec { year: i32, mon: i32, mday: i32, yday: i32}
 
 #[inline(always)]
