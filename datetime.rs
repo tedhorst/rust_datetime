@@ -36,7 +36,7 @@ static SECS_FROM_UNIX_EPOCH: i64 = 62135596800;
 #[inline(always)]
 pub fn leapyear(y: i32) -> bool { y % 4 == 0 && (y % 100 != 0 || y % 400 == 0) }
 
-static MONTH_LOOKUP_VEC: [i32, ..365] = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+static MONTH_LOOKUP_VEC: [i32; 365] = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
                                          2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
                                          3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
                                          4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4,
@@ -55,7 +55,7 @@ pub fn month_lookup(doy: i32, ly: bool) -> i32 {
 	MONTH_LOOKUP_VEC[(doy - xtra) as uint]
 }
 
-static ACCUME_DAYS_VEC: [i32, ..13] = [0, 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
+static ACCUME_DAYS_VEC: [i32; 13] = [0, 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
 
 #[inline(always)]
 fn accume_days(m: i32, ly: bool) -> i32 {
@@ -63,7 +63,7 @@ fn accume_days(m: i32, ly: bool) -> i32 {
 	ACCUME_DAYS_VEC[m as uint] + xtra
 }
 
-static MONTH_LENGTH_VEC: [i32, ..13] = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+static MONTH_LENGTH_VEC: [i32; 13] = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 
 #[inline(always)]
 pub fn month_length(m: i32, ly: bool) -> i32 {
@@ -71,7 +71,7 @@ pub fn month_length(m: i32, ly: bool) -> i32 {
 	MONTH_LENGTH_VEC[m as uint] + xtra
 }
 
-#[deriving(Show, Copy)]
+#[derive(Show, Copy)]
 pub struct DateSpec { year: i32, mon: i32, mday: i32, yday: i32}
 
 #[inline(always)]
@@ -125,7 +125,7 @@ impl Date for i32 {
 		  tm_wday: (*self + 1) % 7,
 		  tm_yday: dp.yday,
 		  tm_isdst: 0,
-		  tm_gmtoff: 0,
+		  tm_utcoff: 0,
 		  tm_nsec: 0
 		}
 	}
@@ -156,7 +156,7 @@ impl Time for i64 {
 		  tm_wday: 0,
 		  tm_yday: 0,
 		  tm_isdst: 0,
-		  tm_gmtoff: 0,
+		  tm_utcoff: 0,
 		  tm_nsec: (*self % 1000000000) as i32
 		}
 	}
@@ -189,7 +189,7 @@ impl DateTime for i64 {
 		  tm_wday: ((d + 1) % 7) as i32,
 		  tm_yday: dp.yday,
 		  tm_isdst: 0,
-		  tm_gmtoff: 0,
+		  tm_utcoff: 0,
 		  tm_nsec: 1000000*(*self % 1000) as i32
 		}
 	}
@@ -223,7 +223,7 @@ impl DateTime for Timespec {
 		  tm_wday: ((d + 1) % 7) as i32,
 		  tm_yday: dp.yday,
 		  tm_isdst: 0,
-		  tm_gmtoff: 0,
+		  tm_utcoff: 0,
 		  tm_nsec: (*self).nsec
 		}
 	}
