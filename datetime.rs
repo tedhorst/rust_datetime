@@ -1,5 +1,5 @@
-#![feature(phase)]
-#[phase(plugin, link)] extern crate log;
+#[macro_use]
+extern crate log;
 
 extern crate time;
 
@@ -52,7 +52,7 @@ static MONTH_LOOKUP_VEC: [i32; 365] = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
 #[inline(always)]
 pub fn month_lookup(doy: i32, ly: bool) -> i32 {
 	let xtra = (ly && doy > 58) as i32;
-	MONTH_LOOKUP_VEC[(doy - xtra) as uint]
+	MONTH_LOOKUP_VEC[(doy - xtra) as usize]
 }
 
 static ACCUME_DAYS_VEC: [i32; 13] = [0, 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
@@ -60,7 +60,7 @@ static ACCUME_DAYS_VEC: [i32; 13] = [0, 0, 31, 59, 90, 120, 151, 181, 212, 243, 
 #[inline(always)]
 fn accume_days(m: i32, ly: bool) -> i32 {
 	let xtra = (ly && m > 2) as i32;
-	ACCUME_DAYS_VEC[m as uint] + xtra
+	ACCUME_DAYS_VEC[m as usize] + xtra
 }
 
 static MONTH_LENGTH_VEC: [i32; 13] = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
@@ -68,10 +68,10 @@ static MONTH_LENGTH_VEC: [i32; 13] = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31,
 #[inline(always)]
 pub fn month_length(m: i32, ly: bool) -> i32 {
 	let xtra = (ly && m == 2) as i32;
-	MONTH_LENGTH_VEC[m as uint] + xtra
+	MONTH_LENGTH_VEC[m as usize] + xtra
 }
 
-#[derive(Show, Copy)]
+#[derive(Copy, Show)]
 pub struct DateSpec { year: i32, mon: i32, mday: i32, yday: i32}
 
 #[inline(always)]
@@ -295,7 +295,7 @@ mod tests {
 
 	fn time_str<T: super::Time>(t: T) -> String {
 		let tm = t.tm();
-		format!("{}{}", tm.strftime("%H:%M:%S").unwrap(), if tm.tm_nsec != 0 { format!("{:09b}", tm.tm_nsec as int) } else { "".to_string() })
+		format!("{}{}", tm.strftime("%H:%M:%S").unwrap(), if tm.tm_nsec != 0 { format!("{:09b}", tm.tm_nsec) } else { "".to_string() })
 
 	}
 
@@ -309,21 +309,21 @@ mod tests {
 
 	fn datetime_str<T: super::DateTime>(t: T) -> String {
 		let tm = t.tm();
-		format!("{}{}", tm.strftime("%Y-%m-%d %H:%M:%S").unwrap(), if tm.tm_nsec != 0 { format!("{:09b}", tm.tm_nsec as int) } else { "".to_string() })
+		format!("{}{}", tm.strftime("%Y-%m-%d %H:%M:%S").unwrap(), if tm.tm_nsec != 0 { format!("{:09b}", tm.tm_nsec) } else { "".to_string() })
 
 	}
 
-	fn test_time<T: Eq + fmt::Show + Clone + ::Time>(i: T) {
+	fn test_time<T: Eq + fmt::String + Clone + ::Time>(i: T) {
 		debug!("test_time: {}, {}", i, time_str(i.clone()));
 		let tm = i.tm();
 		let i2: T = ::Time::from_tm(&tm);
 		if i2 != i {
-			panic!(format!("test_time failed for: {}, {}, {}", i, i2, tm))
+			panic!(format!("test_time failed for: {}, {}, {:?}", i, i2, tm))
 		}
 		let ts = i.timespec();
 		let i2: T = ::Time::from_timespec(ts);
 		if i2 != i {
-			panic!(format!("test_time failed for: {}, {}, {}", i, i2, ts))
+			panic!(format!("test_time failed for: {}, {}, {:?}", i, i2, ts))
 		}
 	}
 
@@ -337,17 +337,17 @@ mod tests {
 		test_time(-86399999999999_i64);
 	}
 
-	fn test_date<T: Eq + fmt::Show + Clone + ::Date>(i: T) {
+	fn test_date<T: Eq + fmt::String + Clone + ::Date>(i: T) {
 		debug!("test_date: {} {}", i, date_str(i.clone()));
 		let tm = i.tm();
 		let i2: T = ::Date::from_tm(&tm);
 		if i2 != i {
-			panic!(format!("test_date failed for: {}, {}, {}", i, i2, tm))
+			panic!(format!("test_date failed for: {}, {}, {:?}", i, i2, tm))
 		}
 		let ts = i.timespec();
 		let i2: T = ::Date::from_timespec(ts);
 		if i2 != i {
-			panic!(format!("test_date failed for: {}, {}, {}", i, i2, ts))
+			panic!(format!("test_date failed for: {}, {}, {:?}", i, i2, ts))
 		}
 	}
 
@@ -405,11 +405,11 @@ mod tests {
 				let dtm = dts.tm();
 				let stm = ::time::at_utc(dts);
 				if stm != dtm {
-					panic!(format!("test_std_time: {}, {}, {}", s, dtm, stm))
+					panic!(format!("test_std_time: {}, {:?}, {:?}", s, dtm, stm))
 				}
 				let sts = dtm.to_timespec();
 				if dts != sts {
-					panic!(format!("test_std_time: {}, {}, {}", s, dts, sts))
+					panic!(format!("test_std_time: {}, {:?}, {:?}", s, dts, sts))
 				}
 			}
 			Err(ref es) => {
@@ -423,11 +423,11 @@ mod tests {
 				let dtm = dt.tm();
 				let stm = ::time::at_utc(dts);
 				if stm != dtm {
-					panic!(format!("test_std_time i64: {}, {}, {}", s, dtm, stm))
+					panic!(format!("test_std_time i64: {}, {:?}, {:?}", s, dtm, stm))
 				}
 				let sts = dtm.to_timespec();
 				if dts != sts {
-					panic!(format!("test_std_time i64: {}, {}, {}", s, dts, sts))
+					panic!(format!("test_std_time i64: {}, {:?}, {:?}", s, dts, sts))
 				}
 			}
 			Err(ref es) => {
@@ -479,11 +479,11 @@ mod tests {
 		   dt.mday > ::month_length(dt.mon, ::leapyear(dt.year)) + 1 ||
 		   dt.yday < 0 ||
 		   dt.yday > 365 {
-			panic!(format!("test_funcs:, {}, {}", inp, dt))
+			panic!(format!("test_funcs:, {}, {:?}", inp, dt))
 		}
 		let d = ::days_from_date(dt.year, dt.mon, dt.mday);
 		if d != inp {
-			panic!(format!("test_funcs: {}, {}, {}", inp, dt, d))
+			panic!(format!("test_funcs: {}, {:?}, {}", inp, dt, d))
 		}
 		debug!("test_funcs {} {}", inp, date_str(inp));
 	}
