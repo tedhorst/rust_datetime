@@ -313,17 +313,17 @@ mod tests {
 
 	}
 
-	fn test_time<T: Eq + fmt::String + Clone + ::Time>(i: T) {
-		debug!("test_time: {}, {}", i, time_str(i.clone()));
+	fn test_time<T: Eq + fmt::Debug + Clone + ::Time>(i: T) {
+		debug!("test_time: {:?}, {:?}", i, time_str(i.clone()));
 		let tm = i.tm();
 		let i2: T = ::Time::from_tm(&tm);
 		if i2 != i {
-			panic!(format!("test_time failed for: {}, {}, {:?}", i, i2, tm))
+			panic!(format!("test_time failed for: {:?}, {:?}, {:?}", i, i2, tm))
 		}
 		let ts = i.timespec();
 		let i2: T = ::Time::from_timespec(ts);
 		if i2 != i {
-			panic!(format!("test_time failed for: {}, {}, {:?}", i, i2, ts))
+			panic!(format!("test_time failed for: {:?}, {:?}, {:?}", i, i2, ts))
 		}
 	}
 
@@ -337,17 +337,17 @@ mod tests {
 		test_time(-86399999999999_i64);
 	}
 
-	fn test_date<T: Eq + fmt::String + Clone + ::Date>(i: T) {
-		debug!("test_date: {} {}", i, date_str(i.clone()));
+	fn test_date<T: Eq + fmt::Debug + Clone + ::Date>(i: T) {
+		debug!("test_date: {:?} {:?}", i, date_str(i.clone()));
 		let tm = i.tm();
 		let i2: T = ::Date::from_tm(&tm);
 		if i2 != i {
-			panic!(format!("test_date failed for: {}, {}, {:?}", i, i2, tm))
+			panic!(format!("test_date failed for: {:?}, {:?}, {:?}", i, i2, tm))
 		}
 		let ts = i.timespec();
 		let i2: T = ::Date::from_timespec(ts);
 		if i2 != i {
-			panic!(format!("test_date failed for: {}, {}, {:?}", i, i2, ts))
+			panic!(format!("test_date failed for: {:?}, {:?}, {:?}", i, i2, ts))
 		}
 	}
 
