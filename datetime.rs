@@ -1,3 +1,5 @@
+#![feature(test)]
+
 #[macro_use]
 extern crate log;
 
@@ -71,7 +73,7 @@ pub fn month_length(m: i32, ly: bool) -> i32 {
 	MONTH_LENGTH_VEC[m as usize] + xtra
 }
 
-#[derive(Copy, Show)]
+#[derive(Copy, Debug)]
 pub struct DateSpec { year: i32, mon: i32, mday: i32, yday: i32}
 
 #[inline(always)]
@@ -289,7 +291,7 @@ impl DateStr for DateTime {
 #[cfg(test)]
 mod tests {
 	extern crate test;
-	use std::{os, fmt};
+	use std::{env, fmt};
 	use time::{Timespec, strptime};
 	use super::DateTime;
 
@@ -490,7 +492,7 @@ mod tests {
 
 	#[test]
 	fn test_all_funcs() {
-		let mplier = if os::getenv("RUST_BENCH").is_some() { 10 } else { 1 };
+		let mplier = if env::var("RUST_BENCH").is_some() { 10 } else { 1 };
 		let mut i = 0;
 		while i < 3652060*mplier {
 			test_funcs(i/mplier);
