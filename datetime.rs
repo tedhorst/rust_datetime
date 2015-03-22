@@ -456,19 +456,19 @@ mod tests {
 	}
 
 	#[test]
-	#[should_fail]
+	#[should_panic]
 	fn test_std_bad_low_limit() {
 		test_std_time("1901-12-13 20:45:51");
 	}
 
 	#[test]
-	#[should_fail]
+	#[should_panic]
 	fn test_bad_leap() {
 		test_dt_str("2100-02-29 23:59:59");
 	}
 
 	#[test]
-	#[should_fail]
+	#[should_panic]
 	fn test_std_bad_hi_limit() {
 		test_std_time("10000-01-01 00:00:00");
 	}
@@ -492,7 +492,7 @@ mod tests {
 
 	#[test]
 	fn test_all_funcs() {
-		let mplier = if env::var("RUST_BENCH").is_some() { 10 } else { 1 };
+		let mplier = if env::var("RUST_BENCH").is_ok() { 10 } else { 1 };
 		let mut i = 0;
 		while i < 3652060*mplier {
 			test_funcs(i/mplier);
