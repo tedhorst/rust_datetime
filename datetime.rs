@@ -33,12 +33,12 @@ trait DateStr {
 	fn from_str(ds: &str) -> Result<Self, ~str>;
 }
 */
-static SECS_FROM_UNIX_EPOCH: i64 = 62135596800;
+const SECS_FROM_UNIX_EPOCH: i64 = 62135596800;
 
 #[inline(always)]
 pub fn leapyear(y: i32) -> bool { y % 4 == 0 && (y % 100 != 0 || y % 400 == 0) }
 
-static MONTH_LOOKUP_VEC: [i32; 365] = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+const MONTH_LOOKUP_VEC: [i32; 365] = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
                                          2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
                                          3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
                                          4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4,
@@ -57,7 +57,7 @@ pub fn month_lookup(doy: i32, ly: bool) -> i32 {
 	MONTH_LOOKUP_VEC[(doy - xtra) as usize]
 }
 
-static ACCUME_DAYS_VEC: [i32; 13] = [0, 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
+const ACCUME_DAYS_VEC: [i32; 13] = [0, 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
 
 #[inline(always)]
 fn accume_days(m: i32, ly: bool) -> i32 {
@@ -65,7 +65,7 @@ fn accume_days(m: i32, ly: bool) -> i32 {
 	ACCUME_DAYS_VEC[m as usize] + xtra
 }
 
-static MONTH_LENGTH_VEC: [i32; 13] = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+const MONTH_LENGTH_VEC: [i32; 13] = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 
 #[inline(always)]
 pub fn month_length(m: i32, ly: bool) -> i32 {
@@ -73,7 +73,7 @@ pub fn month_length(m: i32, ly: bool) -> i32 {
 	MONTH_LENGTH_VEC[m as usize] + xtra
 }
 
-#[derive(Copy, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct DateSpec { year: i32, mon: i32, mday: i32, yday: i32}
 
 #[inline(always)]
